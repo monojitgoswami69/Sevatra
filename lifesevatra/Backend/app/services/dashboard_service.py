@@ -1,59 +1,33 @@
-"""Dashboard aggregation service."""
+"""Dashboard aggregation service using Firestore."""
 
 from datetime import datetime, timedelta
+from google.cloud.firestore import Client
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.models.admission import Admission
-
-
-async def get_dashboard_stats(db: AsyncSession, hospital_id: int) -> dict:
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-
-    # Total admitted patients
-    total_q = select(func.count()).select_from(Admission).where(
-        Admission.hospital_id == hospital_id,
-        Admission.status == "admitted",
-    )
-    total = (await db.execute(total_q)).scalar() or 0
-
-    # Critical patients
-    critical_q = select(func.count()).select_from(Admission).where(
-        Admission.hospital_id == hospital_id,
-        Admission.status == "admitted",
-        Admission.severity_score >= 8,
-    )
-    critical = (await db.execute(critical_q)).scalar() or 0
-
-    # Admitted today
-    admitted_today_q = select(func.count()).select_from(Admission).where(
-        Admission.hospital_id == hospital_id,
-        Admission.status == "admitted",
-        Admission.admission_date >= today_start,
-    )
-    admitted_today = (await db.execute(admitted_today_q)).scalar() or 0
-
-    # Discharged today
-    discharged_today_q = select(func.count()).select_from(Admission).where(
-        Admission.hospital_id == hospital_id,
-        Admission.status == "discharged",
-        Admission.discharged_at >= today_start,
-    )
-    discharged_today = (await db.execute(discharged_today_q)).scalar() or 0
-
-    # Bed occupancy by type
-    all_admitted = await db.execute(
-        select(Admission.bed_id).where(
-            Admission.hospital_id == hospital_id,
-            Admission.status == "admitted",
-        )
-    )
-    bed_ids = [row[0] for row in all_admitted.all()]
-    icu_occ = sum(1 for b in bed_ids if b.startswith("ICU"))
-    hdu_occ = sum(1 for b in bed_ids if b.startswith("HDU"))
-    gen_occ = sum(1 for b in bed_ids if b.startswith("GEN"))
-
+async def get_dashboard_stats(db: Client, hospital_id: int) -> dict:
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    
+    admissions_query = db.collection("admissions").where("hospital_id", "==", hospital_id)
+    admitted_docs = admissions_query.where("status", "==", "admitted").stream()
+    
+    total = 0
+    critical = 0
+    admitted_today = 0
+    bed_ids = []
+    
+    for d in admitted_docs:
+        total += 1
+        data = d.to_dict()
+        if data.get("severity_score", 0) >= 8: critical += 1
+        if data.get("admission_date", "") >= today_start: admitted_today += 1
+        if data.get("bed_id"): bed_ids.append(data["bed_id"])
+        
+    discharged_docs = admissions_query.where("status", "==", "discharged").stream()
+    discharged_today = sum(1 for d in discharged_docs if d.to_dict().get("discharged_at", "") >= today_start)
+    
+    icu_occ = sum(1 for b in bed_ids if str(b).startswith("ICU"))
+    hdu_occ = sum(1 for b in bed_ids if str(b).startswith("HDU"))
+    gen_occ = sum(1 for b in bed_ids if str(b).startswith("GEN"))
+    
     return {
         "totalPatients": total,
         "criticalPatients": critical,
