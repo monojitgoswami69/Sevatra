@@ -6,14 +6,14 @@ import { useNavbar } from '../../context/NavbarContext';
 
 interface SelectOption { value: string; label: string; icon?: string; sub?: string; }
 interface CustomSelectProps {
-  id: string; value: string; onChange: (val: string) => void;
-  options: SelectOption[]; placeholder?: string;
+  id?: string; value: string; onChange: (val: string) => void;
+  options?: SelectOption[]; placeholder?: string;
   openId: string | null; onToggle: (id: string | null) => void;
 }
-const CustomSelect: React.FC<CustomSelectProps> = ({ id, value, onChange, options, placeholder = 'Select...', openId, onToggle }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({ id, value, onChange, options = [], placeholder = 'Select...', openId, onToggle }) => {
   const ref = React.useRef<HTMLDivElement>(null);
   const isOpen = openId === id;
-  const selected = options.find(o => o.value === value);
+  const selected = options?.find(o => o.value === value);
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node) && isOpen) onToggle(null);
@@ -50,13 +50,119 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ id, value, onChange, option
   );
 };
 
+const CustomDatePicker: React.FC<CustomSelectProps> = ({ id, value, onChange, placeholder = 'Select date...', openId, onToggle }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isOpen = openId === id;
+  const [viewDate, setViewDate] = useState(() => value ? new Date(value) : new Date());
+  
+  // Reset view when opening if value exists
+  useEffect(() => {
+    if (isOpen && value) setViewDate(new Date(value));
+  }, [isOpen, value]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node) && isOpen) onToggle(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [isOpen, onToggle]);
+
+  const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
+  const firstDay = (y: number, m: number) => new Date(y, m, 1).getDay(); // 0 = Sun
+
+  const changeMonth = (delta: number) => {
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1));
+  };
+
+  const formatDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const handleSelect = (d: number) => {
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
+    onChange(formatDate(newDate));
+    onToggle(null);
+  };
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const monthName = viewDate.toLocaleString('default', { month: 'long' });
+  const totalDays = daysInMonth(year, month);
+  const startDay = firstDay(year, month);
+  const padding = Array(startDay).fill(null);
+  const days = Array.from({ length: totalDays }, (_, i) => i + 1);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button type="button" onClick={() => onToggle(isOpen ? null : id)}
+        className="w-full flex items-center justify-between rounded-xl border px-4 py-3 bg-muted border-border hover:border-primary text-left transition-all cursor-pointer focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(19,236,19,0.2)]">
+        <span className={`flex items-center gap-2 text-sm ${value ? 'text-card-foreground' : 'text-muted-foreground'}`}>
+          <span className="material-symbols-outlined text-primary text-base">calendar_month</span>
+          {value ? new Date(value).toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'}) : placeholder}
+        </span>
+        <span className={`material-symbols-outlined text-muted-foreground text-base transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-[300px] rounded-xl border border-border bg-card shadow-2xl p-4 right-0 md:right-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <button type="button" onClick={(e) => { e.stopPropagation(); changeMonth(-1); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-card-foreground transition-colors">
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+            </button>
+            <span className="text-sm font-bold text-card-foreground">{monthName} {year}</span>
+            <button type="button" onClick={(e) => { e.stopPropagation(); changeMonth(1); }} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-card-foreground transition-colors">
+              <span className="material-symbols-outlined text-lg">chevron_right</span>
+            </button>
+          </div>
+
+          {/* Weekdays */}
+          <div className="grid grid-cols-7 mb-2">
+            {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+              <div key={d} className="h-8 flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">{d}</div>
+            ))}
+          </div>
+
+          {/* Days */}
+          <div className="grid grid-cols-7 gap-1">
+            {padding.map((_, i) => <div key={`pad-${i}`} />)}
+            {days.map(d => {
+              const current = formatDate(new Date(year, month, d));
+              const isSelected = value === current;
+              const isToday = current === formatDate(new Date());
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleSelect(d); }}
+                  className={`h-8 w-8 rounded-lg text-sm flex items-center justify-center transition-all ${
+                    isSelected 
+                      ? 'bg-primary text-green-950 font-bold shadow-md shadow-primary/20' 
+                      : isToday 
+                        ? 'bg-transparent text-primary border border-primary/50 font-semibold' 
+                        : 'text-card-foreground hover:bg-muted hover:text-primary'
+                  }`}
+                >
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const NewStaff: React.FC = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [isActiveStatus, setIsActiveStatus] = useState(true);
-  const [prescribingRights, setPrescribingRights] = useState(false);
-  const [icuOtAccess, setIcuOtAccess] = useState(true);
   const [onCallDuty, setOnCallDuty] = useState('yes');
   const [blsCertified, setBlsCertified] = useState(false);
   const [aclsCertified, setAclsCertified] = useState(false);
@@ -108,12 +214,27 @@ const NewStaff: React.FC = () => {
     { degree: '', specialization: '', institution: '', completionYear: '' }
   ]);
 
-  const [authorizedProcedures, setAuthorizedProcedures] = useState([
-    'General Consultation',
-    'Minor Surgery',
-    'Emergency Prescribing',
-    'ICU Admissions'
-  ]);
+  const [privilegeLevel, setPrivilegeLevel] = useState('independent');
+
+  const [clinicalPrivileges, setClinicalPrivileges] = useState<Record<string, boolean>>({
+    // Surgical
+    minor_surgery: true, major_surgery: false, laparoscopic: false, orthopedic_proc: false,
+    // Diagnostic
+    general_consultation: true, ecg_interpretation: false, ultrasound_diag: false, lab_ordering: true,
+    // Emergency
+    emergency_triage: true, emergency_prescribing: true, intubation: false, defibrillation: false,
+    // Therapeutic
+    iv_therapy: true, blood_transfusion: false, ventilator_mgmt: false, dialysis_mgmt: false,
+  });
+
+  const [accessRights, setAccessRights] = useState<Record<string, boolean>>({
+    prescribing: false, icu_access: true, ot_access: false, er_access: true, pharmacy_access: false, lab_access: true,
+  });
+
+  const togglePrivilege = (key: string) =>
+    setClinicalPrivileges(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggleAccessRight = (key: string) =>
+    setAccessRights(prev => ({ ...prev, [key]: !prev[key] }));
 
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -150,9 +271,7 @@ const NewStaff: React.FC = () => {
     setCredentials([...credentials, { degree: '', specialization: '', institution: '', completionYear: '' }]);
   };
 
-  const removeProcedure = (index: number) => {
-    setAuthorizedProcedures(prev => prev.filter((_, i) => i !== index));
-  };
+
 
   const handleWorkingDayToggle = (day: keyof typeof workingDays) => {
     setWorkingDays(prev => ({ ...prev, [day]: !prev[day] }));
@@ -237,7 +356,7 @@ const NewStaff: React.FC = () => {
         </button>
         <button
           onClick={() => saveRef.current()}
-          className="flex items-center gap-1.5 rounded-xl h-9 px-5 bg-primary text-green-950 text-sm font-bold hover:bg-[#3bf03b] shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:scale-[1.03] transition-all duration-200"
+          className="flex items-center gap-1.5 rounded-xl h-9 px-5 bg-rose-600 dark:bg-primary text-white dark:text-green-950 text-sm font-bold hover:bg-rose-700 dark:hover:bg-[#3bf03b] shadow-md shadow-rose-500/25 dark:shadow-primary/25 hover:shadow-lg hover:shadow-rose-500/30 dark:hover:shadow-primary/30 hover:scale-[1.03] active:scale-95 transition-all duration-200"
         >
           <span className="material-symbols-outlined text-base">save</span>
           Save Profile
@@ -371,12 +490,13 @@ const NewStaff: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date of Birth</label>
-                    <input 
-                      name="dateOfBirth"
+                    <CustomDatePicker 
+                      id="dateOfBirth" 
                       value={formData.dateOfBirth}
-                      onChange={handleInputChange}
-                      className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-card-foreground placeholder-[#3b543b] focus:border-primary focus:ring-1 focus:ring-[#13ec13] outline-none transition-all [color-scheme:dark]" 
-                      type="date"
+                      onChange={(val) => handleSelectChange('dateOfBirth', val)}
+                      openId={openDropdown} 
+                      onToggle={setOpenDropdown}
+                      placeholder="Select Date of Birth"
                     />
                   </div>
                   <div className="space-y-2">
@@ -434,7 +554,7 @@ const NewStaff: React.FC = () => {
                       setFormData(prev => ({ ...prev, govIdNumber: file.name }));
                     }
                   }}
-                  className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-card-foreground focus:border-primary focus:ring-1 focus:ring-[#13ec13] outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer" 
+                  className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-card-foreground focus:border-primary focus:ring-1 focus:ring-[#13ec13] outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-500 dark:file:bg-primary file:text-white dark:file:text-green-950 hover:file:bg-amber-600 dark:hover:file:bg-[#3bf03b] file:cursor-pointer transition-all active:scale-[0.98]" 
                 />
               </div>
               <div className="space-y-2">
@@ -461,20 +581,13 @@ const NewStaff: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Validity Period (Expiry)</label>
-                <div className="relative group">
-                  <input 
-                    name="validityPeriod"
-                    value={formData.validityPeriod}
-                    onChange={handleInputChange}
-                    className="w-full bg-muted border border-border rounded-xl px-4 py-3 pr-14 text-card-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all hover:border-primary/40 focus:shadow-[0_0_20px_rgba(19,236,19,0.12)] [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
-                    type="date"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
-                      <span className="material-symbols-outlined text-primary text-lg">calendar_month</span>
-                    </div>
-                  </div>
-                </div>
+                <CustomDatePicker 
+                  id="validityPeriod" 
+                  value={formData.validityPeriod}
+                  onChange={(val) => handleSelectChange('validityPeriod', val)}
+                  openId={openDropdown} onToggle={setOpenDropdown}
+                  placeholder="Select Date"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Verification Status</label>
@@ -617,72 +730,102 @@ const NewStaff: React.FC = () => {
 
           {/* Clinical Privileges */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm shadow-black/20">
-            <h3 className="text-lg font-bold text-card-foreground mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">stethoscope</span>
-              Clinical Privileges
-            </h3>
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Authorized Procedures</label>
-                <div className="flex flex-wrap gap-2">
-                  {authorizedProcedures.map((proc, index) => (
-                    <span key={index} className="inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3.5 py-2 text-xs font-medium text-primary">
-                      <span className="material-symbols-outlined text-sm">check_circle</span>
-                      {proc}
-                      <button 
-                        onClick={() => removeProcedure(index)}
-                        className="ml-1 hover:text-red-500 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-sm">close</span>
-                      </button>
-                    </span>
-                  ))}
-                  <button className="inline-flex items-center gap-1.5 rounded-xl border-2 border-dashed border-primary/30 px-3.5 py-2 text-xs font-medium text-primary/70 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all">
-                    <span className="material-symbols-outlined text-sm">add_circle</span> Add Procedure
-                  </button>
-                </div>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-card-foreground flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">stethoscope</span>
+                Clinical Privileges
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="text-primary font-bold">{Object.values(clinicalPrivileges).filter(Boolean).length}</span>/{Object.keys(clinicalPrivileges).length} granted
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border hover:border-primary/30 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${prescribingRights ? 'bg-primary/15 text-primary' : 'bg-border/50 text-muted-foreground'}`}>
-                      <span className="material-symbols-outlined text-xl">medication</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-card-foreground">Prescribing Rights</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Can prescribe narcotics</p>
-                    </div>
+            </div>
+
+            {/* Privilege Level */}
+            <div className="mb-5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">Privilege Level</label>
+              <CustomSelect
+                id="privilegeLevel" value={privilegeLevel}
+                onChange={setPrivilegeLevel}
+                openId={openDropdown} onToggle={setOpenDropdown}
+                placeholder="Select Level"
+                options={[
+                  { value: 'independent', label: 'Full / Independent', icon: 'verified' },
+                  { value: 'supervised', label: 'Supervised', icon: 'supervisor_account' },
+                  { value: 'provisional', label: 'Provisional', icon: 'schedule' },
+                  { value: 'temporary', label: 'Temporary', icon: 'timer' },
+                ]}
+              />
+            </div>
+
+            {/* Procedures — compact rows by category */}
+            <div className="space-y-4">
+              {[
+                { cat: 'Surgical', icon: 'surgical', color: 'text-red-400', items: [
+                  { key: 'minor_surgery', label: 'Minor Surgery' }, { key: 'major_surgery', label: 'Major Surgery' },
+                  { key: 'laparoscopic', label: 'Laparoscopic' }, { key: 'orthopedic_proc', label: 'Orthopedic' },
+                ]},
+                { cat: 'Diagnostic', icon: 'biotech', color: 'text-blue-400', items: [
+                  { key: 'general_consultation', label: 'General Consult' }, { key: 'ecg_interpretation', label: 'ECG Interpret.' },
+                  { key: 'ultrasound_diag', label: 'Ultrasound' }, { key: 'lab_ordering', label: 'Lab Orders' },
+                ]},
+                { cat: 'Emergency', icon: 'emergency', color: 'text-amber-400', items: [
+                  { key: 'emergency_triage', label: 'Triage' }, { key: 'emergency_prescribing', label: 'ER Prescribing' },
+                  { key: 'intubation', label: 'Intubation' }, { key: 'defibrillation', label: 'Defibrillation' },
+                ]},
+                { cat: 'Therapeutic', icon: 'medication', color: 'text-purple-400', items: [
+                  { key: 'iv_therapy', label: 'IV Therapy' }, { key: 'blood_transfusion', label: 'Transfusion' },
+                  { key: 'ventilator_mgmt', label: 'Ventilator' }, { key: 'dialysis_mgmt', label: 'Dialysis' },
+                ]},
+              ].map(cat => (
+                <div key={cat.cat}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`material-symbols-outlined text-sm ${cat.color}`}>{cat.icon}</span>
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{cat.cat}</span>
+                    <div className="flex-1 h-px bg-border"></div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox"
-                      checked={prescribingRights}
-                      onChange={(e) => setPrescribingRights(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-border rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-muted rounded-xl border border-border hover:border-primary/30 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${icuOtAccess ? 'bg-primary/15 text-primary' : 'bg-border/50 text-muted-foreground'}`}>
-                      <span className="material-symbols-outlined text-xl">vital_signs</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-card-foreground">ICU/OT Access</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Critical care zones</p>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                    {cat.items.map(p => (
+                      <button key={p.key} type="button" onClick={() => togglePrivilege(p.key)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all ${
+                          clinicalPrivileges[p.key]
+                            ? 'bg-primary/8 text-card-foreground'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}>
+                        <div className={`w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center shrink-0 transition-all ${
+                          clinicalPrivileges[p.key] ? 'bg-primary border-primary' : 'border-border'
+                        }`}>
+                          {clinicalPrivileges[p.key] && <span className="material-symbols-outlined text-green-950 text-[9px] font-bold">check</span>}
+                        </div>
+                        <span className="text-xs">{p.label}</span>
+                      </button>
+                    ))}
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox"
-                      checked={icuOtAccess}
-                      onChange={(e) => setIcuOtAccess(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-border rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
-                  </label>
                 </div>
+              ))}
+            </div>
+
+            {/* Zone Access — single row */}
+            <div className="mt-5 pt-5 border-t border-border">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Zone Access</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: 'prescribing', label: 'Prescribing', icon: 'prescriptions' },
+                  { key: 'icu_access', label: 'ICU', icon: 'vital_signs' },
+                  { key: 'ot_access', label: 'OT', icon: 'surgical' },
+                  { key: 'er_access', label: 'ER', icon: 'emergency' },
+                  { key: 'pharmacy_access', label: 'Pharmacy', icon: 'vaccines' },
+                  { key: 'lab_access', label: 'Lab', icon: 'science' },
+                ].map(a => (
+                  <button key={a.key} type="button" onClick={() => toggleAccessRight(a.key)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      accessRights[a.key]
+                        ? 'bg-primary/10 text-primary border border-primary/25'
+                        : 'bg-muted text-muted-foreground border border-transparent hover:border-border'
+                    }`}>
+                    <span className="material-symbols-outlined text-sm">{a.icon}</span>
+                    {a.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -776,12 +919,13 @@ const NewStaff: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Joining Date</label>
-                <input 
-                  name="joiningDate"
+                <CustomDatePicker
+                  id="joiningDate" 
                   value={formData.joiningDate}
-                  onChange={handleInputChange}
-                  className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-card-foreground placeholder-[#3b543b] focus:border-primary focus:ring-1 focus:ring-[#13ec13] outline-none transition-all [color-scheme:dark]" 
-                  type="date"
+                  onChange={(val) => handleSelectChange('joiningDate', val)}
+                  openId={openDropdown} 
+                  onToggle={setOpenDropdown}
+                  placeholder="Select Joining Date"
                 />
               </div>
             </div>

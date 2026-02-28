@@ -58,7 +58,7 @@ const Staff: React.FC = () => {
         </button>
         <button
           onClick={() => navigate('/new-staff')}
-          className="flex items-center gap-2 rounded-full bg-primary px-5 py-1.5 text-sm font-bold text-green-950 hover:bg-primary/90 shadow-md shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
+          className="flex items-center gap-2 rounded-full bg-violet-600 dark:bg-primary px-5 py-1.5 text-sm font-bold text-white dark:text-green-950 hover:bg-violet-700 dark:hover:bg-[#3bf03b] shadow-md shadow-violet-500/20 dark:shadow-primary/20 hover:shadow-violet-500/40 dark:hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-300"
         >
           <span className="material-symbols-outlined text-base">person_add</span>
           Add New Staff

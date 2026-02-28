@@ -43,6 +43,15 @@ class AdmissionRead(BaseModel):
     patient_name: str
     age: int
     gender: str
+    blood_group: Optional[str] = None
+    emergency_contact: Optional[str] = None
+    address: Optional[str] = None
+    gov_id_type: Optional[str] = None
+    guardian_name: Optional[str] = None
+    guardian_relation: Optional[str] = None
+    guardian_phone: Optional[str] = None
+    guardian_email: Optional[str] = None
+    whatsapp_number: Optional[str] = None
     bed_id: str
     admission_date: str
     heart_rate: Optional[float] = None

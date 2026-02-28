@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Patient } from '../../types';
 import { getSeverityColor, getSeverityTextColor, getConditionStyles } from '../../utils/severityCalculator';
+import PatientReportModal from './PatientReportModal';
 
 interface PatientTableProps {
   patients: Patient[];
@@ -25,6 +26,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedWard, setSelectedWard] = useState<'all' | 'ICU' | 'HDU' | 'General'>('all');
   const [showWardDropdown, setShowWardDropdown] = useState(false);
+  const [reportPatient, setReportPatient] = useState<Patient | null>(null);
 
   const filteredAndSorted = patients
     .filter(patient => {
@@ -37,6 +39,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
     .sort((a, b) => sortOrder === 'asc' ? a.severityScore - b.severityScore : b.severityScore - a.severityScore);
 
   return (
+    <>
     <div className="rounded-2xl border border-border bg-card overflow-hidden w-full shadow-sm">
       <div className="flex items-center justify-between border-b border-border p-6">
         <h3 className="font-bold text-card-foreground text-lg">
@@ -154,7 +157,10 @@ const PatientTable: React.FC<PatientTableProps> = ({
                     >
                       Details
                     </button>
-                    <button className="rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-all">Report</button>
+                    <button
+                      onClick={() => setReportPatient(patient)}
+                      className="rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-all"
+                    >Report</button>
                     <button
                       onClick={() => onDischarge(patient.id, patient.name)}
                       className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all"
@@ -201,6 +207,15 @@ const PatientTable: React.FC<PatientTableProps> = ({
         </div>
       )}
     </div>
+
+    {/* Patient Report Modal */}
+    {reportPatient && (
+      <PatientReportModal
+        patient={reportPatient}
+        onClose={() => setReportPatient(null)}
+      />
+    )}
+    </>
   );
 };
 

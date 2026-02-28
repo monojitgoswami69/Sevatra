@@ -197,7 +197,7 @@ const DoctorProfile: React.FC = () => {
                   <button type="button" onClick={handleCancel}
                     className="px-5 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors text-sm">Cancel</button>
                   <button type="submit" disabled={saving}
-                    className="px-5 py-2.5 rounded-xl bg-primary text-green-950 font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
+                    className="px-5 py-2.5 rounded-xl bg-sky-600 dark:bg-primary text-white dark:text-green-950 font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] dark:shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:bg-sky-700 dark:hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:shadow-[0_0_25px_rgba(14,165,233,0.5)] hover:scale-[1.02] active:scale-95 transition-all text-sm disabled:opacity-50">
                     {saving ? 'Saving…' : 'Save Profile'}
                   </button>
                 </div>

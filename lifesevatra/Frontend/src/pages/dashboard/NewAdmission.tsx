@@ -544,7 +544,7 @@ const NewAdmission: React.FC = () => {
                   <button
                     onClick={handleCheckAvailability}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl h-[54px] bg-primary text-green-950 text-base font-bold hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl h-[54px] bg-orange-500 dark:bg-primary text-white dark:text-green-950 text-base font-bold hover:bg-orange-600 dark:hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_25px_rgba(249,115,22,0.35)] dark:shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_40px_rgba(249,115,22,0.55)] dark:hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <span className="material-symbols-outlined">bed</span>
                     <span>{isLoading ? 'Checking...' : 'Check Availability'}</span>

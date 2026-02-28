@@ -130,14 +130,14 @@ const Dashboard: React.FC = () => {
       <div className="flex items-center gap-3">
         <button
           onClick={() => refreshRef.current()}
-          className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-gray-900 dark:hover:text-white transition-all"
+          className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:border-indigo-400 dark:hover:border-primary hover:bg-indigo-50 dark:hover:bg-primary/10 hover:text-indigo-600 dark:hover:text-white transition-all duration-300 group hover:scale-105 active:scale-95"
         >
-          <span className="material-symbols-outlined text-base">refresh</span>
+          <span className="material-symbols-outlined text-base group-hover:rotate-180 transition-transform duration-500">refresh</span>
           Refresh
         </button>
         <button
           onClick={() => navigate('/newadmission')}
-          className="flex items-center gap-2 rounded-full bg-primary px-5 py-1.5 text-sm font-bold text-green-950 hover:bg-primary/90 shadow-md shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
+          className="flex items-center gap-2 rounded-full bg-indigo-600 dark:bg-primary px-5 py-1.5 text-sm font-bold text-white dark:text-green-950 hover:bg-indigo-700 dark:hover:bg-[#3bf03b] shadow-md shadow-indigo-500/20 dark:shadow-primary/20 hover:shadow-indigo-500/40 dark:hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-300"
         >
           <span className="material-symbols-outlined text-base">add_circle</span>
           New Admission
