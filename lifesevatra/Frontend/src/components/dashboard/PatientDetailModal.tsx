@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Patient } from '../../types';
-import { getSeverityColor, getSeverityTextColor, getConditionStyles, calculateSeverityScore } from '../../pages/dashboard/SeverityScore';
+import { getSeverityColor, getSeverityTextColor, getConditionStyles, calculateSeverityScore } from '../../utils/severityCalculator';
 import { updateVitals } from '../../services/admissionService';
 
 interface PatientDetailModalProps {

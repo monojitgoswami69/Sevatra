@@ -2,23 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { getDoctorPatients, type AdmittedPatient } from '../../services/admissionService';
+import { getConditionStyles, getConditionDotColor } from '../../utils/severityCalculator';
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
 const conditionBadge = (c: string) => {
-  const map: Record<string, { dot: string; cls: string }> = {
-    critical: { dot: 'bg-red-500 animate-pulse', cls: 'bg-red-500/10 text-red-500 border-red-500/20' },
-    serious: { dot: 'bg-yellow-500', cls: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' },
-    stable: { dot: 'bg-green-500', cls: 'bg-green-500/10 text-green-400 border-green-500/20' },
-    recovering: { dot: 'bg-blue-500', cls: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  const condition = c as import('../../utils/severityCalculator').Condition;
+  return {
+    dot: getConditionDotColor(condition) + (c.toLowerCase() === 'critical' ? ' animate-pulse' : ''),
+    cls: getConditionStyles(condition),
   };
-  return map[c.toLowerCase()] ?? { dot: 'bg-gray-400', cls: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
 };
 
 const severityBadge = (s: number) => {
-  if (s >= 8) return 'bg-red-500/10 text-red-500 border-red-500/20';
-  if (s >= 5) return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-  return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+  if (s >= 8) return 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]';
+  if (s >= 5) return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.2)]';
+  if (s >= 3) return 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/20 shadow-[0_0_10px_rgba(19,236,19,0.2)]';
+  return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.2)]';
 };
 
 const vitalPill = (label: string, value: string | number | null, unit: string, warn: boolean) => (

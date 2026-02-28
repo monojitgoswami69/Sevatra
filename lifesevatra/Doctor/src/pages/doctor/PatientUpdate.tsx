@@ -201,9 +201,10 @@ const PatientUpdate: React.FC = () => {
                 {patient.condition}
               </span>
               <span className={`rounded-full px-3 py-1 text-xs font-bold border ${
-                patient.severity_score >= 8 ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                patient.severity_score >= 5 ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                patient.severity_score >= 8 ? 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]' :
+                patient.severity_score >= 5 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.2)]' :
+                patient.severity_score >= 3 ? 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/20 shadow-[0_0_10px_rgba(19,236,19,0.2)]' :
+                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
               }`}>
                 Score: {patient.severity_score}/10
               </span>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Patient } from '../../types';
-import { getSeverityColor, getSeverityTextColor, getConditionStyles } from '../../pages/dashboard/SeverityScore';
+import { getSeverityColor, getSeverityTextColor, getConditionStyles } from '../../utils/severityCalculator';
 
 interface PatientTableProps {
   patients: Patient[];

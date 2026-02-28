@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAdmission, getBedStats, type AdmissionPayload } from '../../services/admissionService';
-import { calculateSeverityScore as calculateSeverity } from './SeverityScore';
+import { calculateSeverityScore as calculateSeverity } from '../../utils/severityCalculator';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 
 interface VitalsData {
