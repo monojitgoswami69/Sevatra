@@ -1,34 +1,18 @@
-"""File upload service using Supabase Storage."""
+"""File service using Dropbox."""
 
-from typing import Optional
-import httpx
+import dropbox
+import uuid
+from fastapi import UploadFile
 
-from app.config import settings
-
-BUCKET_NAME = "lifesevatra-files"
-
-
-async def upload_file(
-    file_bytes: bytes,
-    file_name: str,
-    content_type: str = "application/octet-stream",
-    folder: str = "uploads",
-) -> str:
-    """Upload a file to Supabase Storage and return the public URL."""
-    path = f"{folder}/{file_name}"
-    url = f"{settings.SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{path}"
-
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            url,
-            content=file_bytes,
-            headers={
-                "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
-                "Content-Type": content_type,
-                "x-upsert": "true",
-            },
-        )
-        resp.raise_for_status()
-
-    public_url = f"{settings.SUPABASE_URL}/storage/v1/object/public/{BUCKET_NAME}/{path}"
-    return public_url
+async def upload_file(dbx: dropbox.Dropbox, file: UploadFile, folder: str) -> str:
+    ext = file.filename.split('.')[-1] if '.' in file.filename else 'unknown'
+    filename = f"{uuid.uuid4()}.{ext}"
+    path = f"/{folder}/{filename}"
+    
+    content = await file.read()
+    dbx.files_upload(content, path, mode=dropbox.files.WriteMode.overwrite)
+    
+    link_info = dbx.sharing_create_shared_link_with_settings(path)
+    # Convert 'dl=0' to 'raw=1' for direct accessing
+    url = link_info.url.replace("dl=0", "raw=1")
+    return url
