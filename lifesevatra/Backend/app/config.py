@@ -3,15 +3,11 @@
 from pydantic_settings import BaseSettings
 from typing import List
 
-
 class Settings(BaseSettings):
-    # Supabase
-    SUPABASE_URL: str = ""
-    SUPABASE_ANON_KEY: str = ""
-    SUPABASE_SERVICE_ROLE_KEY: str = ""
-    DATABASE_URL: str = ""
+    FIREBASE_CREDENTIAL_PATH: str = ""
+    DROPBOX_ACCESS_TOKEN: str = ""
+    MOCK_DB: bool = True  # Default to true for testing if no creds
 
-    # App
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:5174"
@@ -23,6 +19,5 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
-
 
 settings = Settings()
