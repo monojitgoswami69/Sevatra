@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllStaff, getStaffStats, updateDutyStatus, deleteStaff } from '../../services/staffService';
+import { getAllStaff, getStaffStats, updateDutyStatus } from '../../services/staffService';
 import type { StaffMember, StaffStats } from '../../services/staffService';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavbar } from '../../context/NavbarContext';
@@ -41,14 +41,6 @@ const Staff: React.FC = () => {
     } catch (err) { console.error(err); }
   };
 
-  const handleDelete = async (staffId: string) => {
-    if (!confirm('Are you sure you want to remove this staff member?')) return;
-    try {
-      await deleteStaff(staffId);
-      fetchData();
-    } catch (err) { console.error(err); }
-  };
-
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   // Inject title and actions into the top navbar
@@ -84,7 +76,7 @@ const Staff: React.FC = () => {
       (filterRole === 'Doctors' && ['doctor', 'surgeon', 'specialist'].includes(s.role)) ||
       (filterRole === 'Nurses' && s.role === 'nurse');
     return matchesSearch && matchesRole;
-  });
+  }).sort((a, b) => (b.on_duty ? 1 : 0) - (a.on_duty ? 1 : 0));
 
   const totalStaff = stats ? parseInt(stats.total_staff) : staffList.length;
   const onDuty = stats ? parseInt(stats.on_duty) : 0;
@@ -273,9 +265,29 @@ const Staff: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs text-muted-foreground">{staff.current_patient_count}/{staff.max_patients} pts</span>
-                          <button onClick={() => handleDelete(staff.staff_id)} className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-red-500 hover:border-red-500/50 transition-all">
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          {staff.on_duty ? (
+                            <button
+                              onClick={() => handleToggleDuty(staff.staff_id)}
+                              title="Mark Absent"
+                              className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 hover:border-red-500/60 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleDuty(staff.staff_id)}
+                              title="Mark Present"
+                              className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 hover:border-primary/60 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">check</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => navigate('/new-staff', { state: { editStaff: staff } })}
+                            title="Edit Staff"
+                            className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
                           </button>
                         </div>
                       </td>

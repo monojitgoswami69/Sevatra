@@ -5,7 +5,6 @@ interface StatsCardsProps {
     totalPatients: number;
     criticalPatients: number;
     admittedToday: number;
-    dischargedToday: number;
     bedOccupancy: {
       icuOccupied: number;
       hduOccupied: number;
@@ -26,7 +25,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardStats, bedData }) => {
   const availableBeds = totalBeds - totalOccupied;
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
       {/* Total Occupancy Card */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-blue-400/40 transition-colors group">
         <div className="mb-4 flex items-center justify-between">
@@ -70,16 +69,6 @@ const StatsCards: React.FC<StatsCardsProps> = ({ dashboardStats, bedData }) => {
         </div>
       </div>
 
-      {/* Discharges Today */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-purple-400/40 transition-colors group">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="rounded-xl bg-purple-500/10 p-3 text-purple-500 border border-purple-500/20 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all">
-            <span className="material-symbols-outlined">event_available</span>
-          </div>
-        </div>
-        <h3 className="text-4xl font-bold text-card-foreground">{dashboardStats.dischargedToday}</h3>
-        <p className="text-sm font-medium text-muted-foreground mt-1">Discharges Today</p>
-      </div>
     </div>
   );
 };

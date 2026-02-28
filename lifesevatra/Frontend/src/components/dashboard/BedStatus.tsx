@@ -13,11 +13,9 @@ interface BedStatusProps {
     hduBeds: number;
     generalBeds: number;
   };
-  patients: Array<{ id: string; name: string; initials: string; severityScore: number }>;
-  onDischarge: (patientId: string, patientName: string) => void;
 }
 
-const BedStatus: React.FC<BedStatusProps> = ({ dashboardStats, bedData, patients, onDischarge }) => {
+const BedStatus: React.FC<BedStatusProps> = ({ dashboardStats, bedData }) => {
   const getBedAvailabilityStatus = (occupied: number, total: number) => {
     if (total === 0) return { label: 'No Beds', color: 'text-gray-400', bgColor: 'bg-gray-500', borderColor: 'border-gray-500/50', glowColor: 'hover:shadow-[0_0_20px_rgba(156,163,175,0.1)]', indicatorBg: 'bg-gray-500' };
     const occupancyPercentage = (occupied / total) * 100;
@@ -52,39 +50,11 @@ const BedStatus: React.FC<BedStatusProps> = ({ dashboardStats, bedData, patients
     );
   };
 
-  const dischargeCandidates = patients.filter(p => p.severityScore <= 3);
-
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {renderBedCard('ICU Beds', dashboardStats.bedOccupancy.icuOccupied, bedData.icuBeds)}
       {renderBedCard('HDU Beds', dashboardStats.bedOccupancy.hduOccupied, bedData.hduBeds)}
       {renderBedCard('General Beds', dashboardStats.bedOccupancy.generalOccupied, bedData.generalBeds)}
-
-      {/* Discharge Candidates */}
-      <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md flex flex-col lg:col-span-2">
-        <div className="relative flex-1 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-sm font-semibold text-muted-foreground">Discharge Candidates</h4>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
-              {dischargeCandidates.length} Candidates
-            </span>
-          </div>
-          <div className="space-y-4 mt-auto">
-            {dischargeCandidates.slice(0, 3).map(p => (
-              <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs text-card-foreground font-bold border border-border">{p.initials}</div>
-                  <div><p className="text-sm font-medium text-card-foreground">{p.name}</p></div>
-                </div>
-                <button onClick={() => onDischarge(p.id, p.name)} className="text-xs font-bold text-primary hover:text-primary-dark hover:underline">Process</button>
-              </div>
-            ))}
-            {dischargeCandidates.length === 0 && (
-              <p className="text-xs text-muted-foreground/60 text-center py-4">No discharge candidates</p>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

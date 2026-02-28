@@ -70,6 +70,30 @@ const NewAdmission: React.FC = () => {
     address: '',
   });
 
+  const [relationOpen, setRelationOpen] = useState(false);
+  const relationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (relationRef.current && !relationRef.current.contains(e.target as Node)) setRelationOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const [govIdTypeOpen, setGovIdTypeOpen] = useState(false);
+  const govIdTypeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (govIdTypeRef.current && !govIdTypeRef.current.contains(e.target as Node)) {
+        setGovIdTypeOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -252,24 +276,8 @@ const NewAdmission: React.FC = () => {
     <div className="flex flex-col font-display">
 
       {/* Main Content */}
-      <main className="flex-1 flex justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[1200px] flex flex-col gap-8">
-          {/* Page Header */}
-          <div className="flex flex-col gap-2 border-b border-border pb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary shadow-[0_0_15px_rgba(19,236,19,0.2)] hover:scale-110 transition-all cursor-pointer">
-                <span className="material-symbols-outlined">person_add</span>
-              </div>
-              <h1 className="text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
-                New Patient Admission
-              </h1>
-            </div>
-            <p className="text-gray-400 text-base font-normal leading-normal max-w-2xl">
-              Enter patient details, medical history, and current vitals to assess severity and
-              allocate appropriate bed resources.
-            </p>
-          </div>
-
+      <main className="flex-1 p-3">
+        <div className="w-full flex flex-col gap-4">
           {/* Status Messages */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-start gap-3">
@@ -332,7 +340,7 @@ const NewAdmission: React.FC = () => {
                         Age <span className="text-red-400">*</span>
                       </span>
                       <input
-                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         placeholder="Years"
                         type="number"
                         value={patientData.age}
@@ -536,7 +544,7 @@ const NewAdmission: React.FC = () => {
                   <button
                     onClick={handleCheckAvailability}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl h-12 bg-primary text-green-950 text-base font-bold hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl h-[54px] bg-primary text-green-950 text-base font-bold hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <span className="material-symbols-outlined">bed</span>
                     <span>{isLoading ? 'Checking...' : 'Check Availability'}</span>
@@ -586,27 +594,69 @@ const NewAdmission: React.FC = () => {
                           />
                         </label>
 
-                        <label className="flex flex-col">
+                        <div className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
                             Type of Govt ID
                           </span>
-                          <select
-                            className="form-select block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
-                            value={patientData.govIdType}
-                            onChange={(e) => handlePatientDataChange('govIdType', e.target.value)}
-                          >
-                            <option value="" className="bg-muted text-gray-400">Select ID type</option>
-                            <option value="ABHA ID" className="bg-muted text-card-foreground">ABHA ID (Ayushman Bharat Health Account)</option>
-                            <option value="Ayushman Bharat / PM-JAY Card" className="bg-muted text-card-foreground">Ayushman Bharat / PM-JAY Card</option>
-                            <option value="Aadhaar Card" className="bg-muted text-card-foreground">Aadhaar Card</option>
-                            <option value="Passport" className="bg-muted text-card-foreground">Passport</option>
-                            <option value="Voter ID" className="bg-muted text-card-foreground">Voter ID</option>
-                            <option value="Driving License" className="bg-muted text-card-foreground">Driving License</option>
-                            <option value="Swasthya Sathi" className="bg-muted text-card-foreground">Swasthya Sathi</option>
-                            <option value="Aarogyasri" className="bg-muted text-card-foreground">Aarogyasri</option>
-                            <option value="ESI Card" className="bg-muted text-card-foreground">ESI Card</option>
-                          </select>
-                        </label>
+                          <div className="relative" ref={govIdTypeRef}>
+                            <button
+                              type="button"
+                              onClick={() => setGovIdTypeOpen(o => !o)}
+                              className="w-full flex items-center justify-between rounded-xl border px-4 py-3 transition-all shadow-sm text-left bg-muted border-border hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
+                            >
+                              <span className={`flex items-center gap-2 text-sm ${patientData.govIdType ? 'text-card-foreground' : 'text-muted-foreground'}`}>
+                                {patientData.govIdType ? (
+                                  <>
+                                    <span className="material-symbols-outlined text-primary text-base">
+                                      {patientData.govIdType === 'ABHA ID' ? 'health_and_safety' :
+                                       patientData.govIdType === 'Ayushman Bharat / PM-JAY Card' ? 'medical_services' :
+                                       patientData.govIdType === 'Aadhaar Card' ? 'fingerprint' :
+                                       patientData.govIdType === 'Passport' ? 'travel_explore' :
+                                       patientData.govIdType === 'Voter ID' ? 'how_to_vote' :
+                                       patientData.govIdType === 'Driving License' ? 'drive_eta' :
+                                       'badge'}
+                                    </span>
+                                    {patientData.govIdType}
+                                  </>
+                                ) : 'Select ID type'}
+                              </span>
+                              <span className={`material-symbols-outlined text-muted-foreground text-base transition-transform duration-200 ${govIdTypeOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            {govIdTypeOpen && (
+                              <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+                                {([
+                                  { value: 'ABHA ID', label: 'ABHA ID', sub: 'Ayushman Bharat Health Account', icon: 'health_and_safety' },
+                                  { value: 'Ayushman Bharat / PM-JAY Card', label: 'Ayushman Bharat / PM-JAY Card', sub: 'Government health scheme', icon: 'medical_services' },
+                                  { value: 'Aadhaar Card', label: 'Aadhaar Card', sub: 'UIDAI identity document', icon: 'fingerprint' },
+                                  { value: 'Passport', label: 'Passport', sub: 'International travel document', icon: 'travel_explore' },
+                                  { value: 'Voter ID', label: 'Voter ID', sub: 'Election commission card', icon: 'how_to_vote' },
+                                  { value: 'Driving License', label: 'Driving License', sub: 'Motor vehicle authority', icon: 'drive_eta' },
+                                  { value: 'Swasthya Sathi', label: 'Swasthya Sathi', sub: 'West Bengal health scheme', icon: 'local_hospital' },
+                                  { value: 'Aarogyasri', label: 'Aarogyasri', sub: 'Andhra Pradesh health scheme', icon: 'healing' },
+                                  { value: 'ESI Card', label: 'ESI Card', sub: 'Employee state insurance', icon: 'badge' },
+                                ] as { value: string; label: string; sub: string; icon: string }[]).map((opt) => (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => { handlePatientDataChange('govIdType', opt.value); setGovIdTypeOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted transition-colors ${
+                                      patientData.govIdType === opt.value ? 'bg-primary/10 text-primary' : 'text-card-foreground'
+                                    }`}
+                                  >
+                                    <span className={`material-symbols-outlined text-lg ${patientData.govIdType === opt.value ? 'text-primary' : 'text-muted-foreground'}`}>{opt.icon}</span>
+                                    <div>
+                                      <p className="text-sm font-medium leading-tight">{opt.label}</p>
+                                      <p className="text-[11px] text-muted-foreground">{opt.sub}</p>
+                                    </div>
+                                    {patientData.govIdType === opt.value && (
+                                      <span className="material-symbols-outlined text-primary text-base ml-auto">check</span>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
                         <label className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
@@ -636,31 +686,81 @@ const NewAdmission: React.FC = () => {
                       </h3>
                       
                       <div className="space-y-3">
-                        <label className="flex flex-col">
-                          <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
-                            Guardian Name
-                          </span>
-                          <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
-                            placeholder="Full name"
-                            type="text"
-                            value={patientData.guardianName}
-                            onChange={(e) => handlePatientDataChange('guardianName', e.target.value)}
-                          />
-                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="flex flex-col">
+                            <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
+                              Guardian Name
+                            </span>
+                            <input
+                              className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                              placeholder="Full name"
+                              type="text"
+                              value={patientData.guardianName}
+                              onChange={(e) => handlePatientDataChange('guardianName', e.target.value)}
+                            />
+                          </label>
 
-                        <label className="flex flex-col">
-                          <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
-                            Relationship with patient
-                          </span>
-                          <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
-                            placeholder="e.g., Parent"
-                            type="text"
-                            value={patientData.guardianRelation}
-                            onChange={(e) => handlePatientDataChange('guardianRelation', e.target.value)}
-                          />
-                        </label>
+                          <div className="flex flex-col">
+                            <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
+                              Relationship with patient
+                            </span>
+                            <div className="relative" ref={relationRef}>
+                              <button
+                                type="button"
+                                onClick={() => setRelationOpen(o => !o)}
+                                className="w-full flex items-center justify-between rounded-xl border px-4 py-3 transition-all shadow-sm text-left bg-muted border-border hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
+                              >
+                                <span className={`flex items-center gap-2 text-sm ${patientData.guardianRelation ? 'text-card-foreground' : 'text-muted-foreground'}`}>
+                                  {patientData.guardianRelation ? (
+                                    <>
+                                      <span className="material-symbols-outlined text-primary text-base">
+                                        {patientData.guardianRelation === 'Father' ? 'man' :
+                                         patientData.guardianRelation === 'Mother' ? 'woman' :
+                                         patientData.guardianRelation === 'Spouse' ? 'favorite' :
+                                         patientData.guardianRelation === 'Sibling' ? 'people' :
+                                         patientData.guardianRelation === 'Child' ? 'child_care' :
+                                         patientData.guardianRelation === 'Friend' ? 'group' : 'person'}
+                                      </span>
+                                      {patientData.guardianRelation}
+                                    </>
+                                  ) : 'Select relationship'}
+                                </span>
+                                <span className={`material-symbols-outlined text-muted-foreground text-base transition-transform duration-200 ${relationOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                              </button>
+                              {relationOpen && (
+                                <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+                                  {([
+                                    { value: 'Father', icon: 'man', sub: 'Parent (male)' },
+                                    { value: 'Mother', icon: 'woman', sub: 'Parent (female)' },
+                                    { value: 'Spouse', icon: 'favorite', sub: 'Husband / Wife / Partner' },
+                                    { value: 'Sibling', icon: 'people', sub: 'Brother / Sister' },
+                                    { value: 'Child', icon: 'child_care', sub: 'Son / Daughter' },
+                                    { value: 'Friend', icon: 'group', sub: 'Close friend' },
+                                    { value: 'Other', icon: 'person', sub: 'Other relationship' },
+                                  ] as { value: string; icon: string; sub: string }[]).map((opt) => (
+                                    <button
+                                      key={opt.value}
+                                      type="button"
+                                      onClick={() => { handlePatientDataChange('guardianRelation', opt.value); setRelationOpen(false); }}
+                                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted transition-colors ${
+                                        patientData.guardianRelation === opt.value ? 'bg-primary/10 text-primary' : 'text-card-foreground'
+                                      }`}
+                                    >
+                                      <span className={`material-symbols-outlined text-lg ${patientData.guardianRelation === opt.value ? 'text-primary' : 'text-muted-foreground'}`}>{opt.icon}</span>
+                                      <div>
+                                        <p className="text-sm font-medium leading-tight">{opt.value}</p>
+                                        <p className="text-[11px] text-muted-foreground">{opt.sub}</p>
+                                      </div>
+                                      {patientData.guardianRelation === opt.value && (
+                                        <span className="material-symbols-outlined text-primary text-base ml-auto">check</span>
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
                         <label className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">

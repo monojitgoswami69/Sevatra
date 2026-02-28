@@ -165,13 +165,11 @@ const Dashboard: React.FC = () => {
         {/* Stats Cards */}
         <StatsCards dashboardStats={dashboardStats} bedData={bedData} />
 
-        {/* Bed Status & Discharge Candidates */}
+        {/* Bed Status */}
         <div className="flex flex-col gap-6">
           <BedStatus
             dashboardStats={dashboardStats}
             bedData={bedData}
-            patients={patients}
-            onDischarge={handleDischarge}
           />
 
           {/* Patient Table */}
