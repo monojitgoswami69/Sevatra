@@ -240,13 +240,13 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className={`flex min-h-screen w-full overflow-hidden ${isDarkMode ? 'bg-[#111811]' : 'bg-white'} relative`}>
+    <div className={`flex min-h-screen w-full overflow-hidden ${isDarkMode ? 'bg-muted' : 'bg-white'} relative`}>
       {/* Theme Toggle Button */}
       <button
         onClick={() => setIsDarkMode(!isDarkMode)}
         className={`absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg ${
           isDarkMode 
-            ? 'bg-[#1c271c] border border-[#3b543b] text-[#13ec13] hover:bg-[#152015]' 
+            ? 'bg-card border border-border text-primary hover:bg-muted' 
             : 'bg-white border border-slate-200 text-primary hover:bg-slate-50'
         }`}
         aria-label="Toggle theme"
@@ -290,31 +290,31 @@ const Register: React.FC = () => {
           </div>
           
           <h2 className={`text-4xl font-bold tracking-tight mb-6 ${
-            isDarkMode ? 'text-white' : 'text-emerald-950'
+            isDarkMode ? 'text-card-foreground' : 'text-emerald-950'
           }`}>Partner with Lifesevatra</h2>
           <p className={`text-lg leading-relaxed ${
-            isDarkMode ? 'text-[#9db99d]' : 'text-emerald-700'
+            isDarkMode ? 'text-muted-foreground' : 'text-emerald-700'
           }`}>
             Join the largest network of connected emergency care providers. Streamline patient intake and manage bed availability in real-time.
           </p>
           
           <div className={`mt-12 grid grid-cols-3 gap-4 text-center border-t ${
-            isDarkMode ? 'border-[#13ec13]/30' : 'border-emerald-200'
+            isDarkMode ? 'border-primary/30' : 'border-emerald-200'
           } pt-8`}>
             <div>
-              <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-emerald-900'}`}>24/7</div>
+              <div className={`text-2xl font-bold ${isDarkMode ? 'text-card-foreground' : 'text-emerald-900'}`}>24/7</div>
               <div className={`text-xs uppercase tracking-wider mt-1 ${
                 isDarkMode ? 'text-gray-400' : 'text-emerald-600'
               }`}>Support</div>
             </div>
             <div>
-              <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-emerald-900'}`}>500+</div>
+              <div className={`text-2xl font-bold ${isDarkMode ? 'text-card-foreground' : 'text-emerald-900'}`}>500+</div>
               <div className={`text-xs uppercase tracking-wider mt-1 ${
                 isDarkMode ? 'text-gray-400' : 'text-emerald-600'
               }`}>Hospitals</div>
             </div>
             <div>
-              <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-emerald-900'}`}>0s</div>
+              <div className={`text-2xl font-bold ${isDarkMode ? 'text-card-foreground' : 'text-emerald-900'}`}>0s</div>
               <div className={`text-xs uppercase tracking-wider mt-1 ${
                 isDarkMode ? 'text-gray-400' : 'text-emerald-600'
               }`}>Latency</div>
@@ -325,7 +325,7 @@ const Register: React.FC = () => {
 
       {/* Right Side - Form */}
       <div className={`w-full lg:w-1/2 lg:ml-auto flex flex-col min-h-screen ${
-        isDarkMode ? 'bg-[#111811]' : 'bg-white'
+        isDarkMode ? 'bg-muted' : 'bg-white'
       } relative overflow-y-auto`}>
         {/* Background Pattern for light mode */}
         <div className={`absolute inset-0 pointer-events-none ${
@@ -340,7 +340,7 @@ const Register: React.FC = () => {
             <div className="flex items-center gap-3">
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg border shadow-sm group cursor-pointer ${
                 isDarkMode 
-                  ? 'bg-[#13ec13]/10 border-[#13ec13]/20 text-[#13ec13] shadow-[0_0_25px_rgba(19,236,19,0.3)] hover:shadow-[0_0_40px_rgba(19,236,19,0.6),0_0_60px_rgba(19,236,19,0.3)]' 
+                  ? 'bg-primary/10 border-primary/20 text-primary shadow-[0_0_25px_rgba(19,236,19,0.3)] hover:shadow-[0_0_40px_rgba(19,236,19,0.6),0_0_60px_rgba(19,236,19,0.3)]' 
                   : 'bg-green-50 border-green-100 text-green-600 shadow-[0_0_15px_rgba(22,163,74,0.2)] hover:shadow-[0_0_30px_rgba(22,163,74,0.5)]'
               } transition-all duration-500 hover:scale-110`}>
                 <svg 
@@ -357,7 +357,7 @@ const Register: React.FC = () => {
                 </svg>
               </div>
               <h2 className={`text-2xl font-bold leading-tight tracking-tight ${
-                isDarkMode ? 'text-white' : 'text-slate-900'
+                isDarkMode ? 'text-card-foreground' : 'text-slate-900'
               }`}>
                 Lifesevatra
               </h2>
@@ -365,7 +365,7 @@ const Register: React.FC = () => {
             
             <div>
               <h1 className={`tracking-tight text-3xl font-bold leading-tight mb-2 ${
-                isDarkMode ? 'text-white' : 'text-slate-900'
+                isDarkMode ? 'text-card-foreground' : 'text-slate-900'
               }`}>
                 Register Hospital
               </h1>
@@ -419,9 +419,9 @@ const Register: React.FC = () => {
                   <input 
                     className={`form-input block w-full rounded-xl border px-4 py-3.5 pl-11 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 ${
                       errors.hospitalName
-                        ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                        ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                         : isDarkMode 
-                        ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                        ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                         : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                     }`}
                     placeholder="e.g. Saint Mary's General Hospital"
@@ -434,7 +434,7 @@ const Register: React.FC = () => {
                     errors.hospitalName
                       ? 'text-red-500'
                       : isDarkMode 
-                      ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                      ? 'text-gray-500 group-focus-within:text-primary'
                       : 'text-slate-400 group-focus-within:text-green-600'
                   }`}>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -463,9 +463,9 @@ const Register: React.FC = () => {
                   <input 
                     className={`form-input block w-full rounded-xl border px-4 py-3.5 pl-11 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 ${
                       errors.email
-                        ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                        ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                         : isDarkMode 
-                        ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                        ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                         : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                     }`}
                     placeholder="admin@hospital.com"
@@ -478,7 +478,7 @@ const Register: React.FC = () => {
                     errors.email
                       ? 'text-red-500'
                       : isDarkMode 
-                      ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                      ? 'text-gray-500 group-focus-within:text-primary'
                       : 'text-slate-400 group-focus-within:text-green-600'
                   }`}>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -507,9 +507,9 @@ const Register: React.FC = () => {
                   <input 
                     className={`form-input block w-full rounded-xl border px-4 py-3.5 pl-11 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 ${
                       errors.contactNumber
-                        ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                        ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                         : isDarkMode 
-                        ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                        ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                         : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                     }`}
                     placeholder="1234567890"
@@ -522,7 +522,7 @@ const Register: React.FC = () => {
                     errors.contactNumber
                       ? 'text-red-500'
                       : isDarkMode 
-                      ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                      ? 'text-gray-500 group-focus-within:text-primary'
                       : 'text-slate-400 group-focus-within:text-green-600'
                   }`}>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -556,7 +556,7 @@ const Register: React.FC = () => {
                 <button 
                   className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     isDarkMode 
-                      ? 'text-[#13ec13] hover:text-[#13ec13]/80 hover:bg-[#13ec13]/10'
+                      ? 'text-primary hover:text-primary/80 hover:bg-primary/10'
                       : 'text-green-700 hover:text-green-800 hover:bg-green-100'
                   }`}
                   type="button"
@@ -584,9 +584,9 @@ const Register: React.FC = () => {
                 <textarea 
                   className={`form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-none shadow-sm focus:outline-0 focus:ring-0 ${
                     errors.address
-                      ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                      ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                       : isDarkMode 
-                      ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                      ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                       : 'border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-green-600 focus:outline-none focus:ring-0 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                   }`}
                   placeholder="Street Address, City, State, Zip Code"
@@ -633,9 +633,9 @@ const Register: React.FC = () => {
                     <input 
                       className={`form-input block w-full rounded-xl border px-3 py-3 pl-10 placeholder:text-gray-500 transition-all font-semibold shadow-sm focus:outline-0 focus:ring-0 ${
                         errors.icuBeds
-                          ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                          ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                           : isDarkMode 
-                          ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                          ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                           : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                       }`}
                       placeholder="00"
@@ -648,7 +648,7 @@ const Register: React.FC = () => {
                       errors.icuBeds
                         ? 'text-red-500'
                         : isDarkMode 
-                        ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                        ? 'text-gray-500 group-focus-within:text-primary'
                         : 'text-slate-400 group-focus-within:text-green-600'
                     }`}>
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -677,9 +677,9 @@ const Register: React.FC = () => {
                     <input 
                       className={`form-input block w-full rounded-xl border px-3 py-3 pl-10 placeholder:text-gray-500 transition-all font-semibold shadow-sm focus:outline-0 focus:ring-0 ${
                         errors.hduBeds
-                          ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                          ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                           : isDarkMode 
-                          ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                          ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                           : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                       }`}
                       placeholder="00"
@@ -692,7 +692,7 @@ const Register: React.FC = () => {
                       errors.hduBeds
                         ? 'text-red-500'
                         : isDarkMode 
-                        ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                        ? 'text-gray-500 group-focus-within:text-primary'
                         : 'text-slate-400 group-focus-within:text-green-600'
                     }`}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -721,9 +721,9 @@ const Register: React.FC = () => {
                     <input 
                       className={`form-input block w-full rounded-xl border px-3 py-3 pl-10 placeholder:text-gray-500 transition-all font-semibold shadow-sm focus:outline-0 focus:ring-0 ${
                         errors.generalBeds
-                          ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                          ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                           : isDarkMode 
-                          ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                          ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                           : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                       }`}
                       placeholder="00"
@@ -736,7 +736,7 @@ const Register: React.FC = () => {
                       errors.generalBeds
                         ? 'text-red-500'
                         : isDarkMode 
-                        ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                        ? 'text-gray-500 group-focus-within:text-primary'
                         : 'text-slate-400 group-focus-within:text-green-600'
                     }`}>
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -769,9 +769,9 @@ const Register: React.FC = () => {
                   <input 
                     className={`form-input block w-full rounded-xl border px-4 py-3.5 pl-11 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 ${
                       errors.password
-                        ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                        ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                         : isDarkMode 
-                        ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                        ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                         : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                     }`}
                     placeholder="••••••••"
@@ -784,7 +784,7 @@ const Register: React.FC = () => {
                     errors.password
                       ? 'text-red-500'
                       : isDarkMode 
-                      ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                      ? 'text-gray-500 group-focus-within:text-primary'
                       : 'text-slate-400 group-focus-within:text-green-600'
                   }`}>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -813,9 +813,9 @@ const Register: React.FC = () => {
                   <input 
                     className={`form-input block w-full rounded-xl border px-4 py-3.5 pl-11 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 ${
                       errors.confirmPassword
-                        ? 'border-red-500 bg-red-500/5 text-white focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                        ? 'border-red-500 bg-red-500/5 text-card-foreground focus:border-red-500 focus:shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                         : isDarkMode 
-                        ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80'
+                        ? 'text-card-foreground border-border bg-card focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-border/80'
                         : 'border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-green-600 focus:bg-white focus:outline-none focus:ring-0 shadow-slate-200/50 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                     }`}
                     placeholder="••••••••"
@@ -828,7 +828,7 @@ const Register: React.FC = () => {
                     errors.confirmPassword
                       ? 'text-red-500'
                       : isDarkMode 
-                      ? 'text-gray-500 group-focus-within:text-[#13ec13]'
+                      ? 'text-gray-500 group-focus-within:text-primary'
                       : 'text-slate-400 group-focus-within:text-green-600'
                   }`}>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -853,8 +853,8 @@ const Register: React.FC = () => {
                 type="submit"
                 className={`flex w-full cursor-pointer items-center justify-center overflow-hidden h-14 px-5 active:scale-[0.98] transition-all duration-300 text-lg font-bold leading-normal tracking-wide relative group ${
                   isDarkMode 
-                    ? 'rounded-xl bg-[#13ec13] hover:bg-[#3bf03b] text-green-950 shadow-[0_0_30px_rgba(19,236,19,0.4),0_0_60px_rgba(19,236,19,0.2)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7),0_0_100px_rgba(19,236,19,0.4)] hover:scale-105'
-                    : 'rounded-full bg-[#13ec13] hover:bg-[#3bf03b] text-green-950 shadow-[0_0_30px_rgba(19,236,19,0.5),0_0_60px_rgba(19,236,19,0.3)] hover:shadow-[0_0_50px_rgba(19,236,19,0.8),0_0_100px_rgba(19,236,19,0.5)] hover:scale-105'
+                    ? 'rounded-xl bg-primary hover:bg-[#3bf03b] text-green-950 shadow-[0_0_30px_rgba(19,236,19,0.4),0_0_60px_rgba(19,236,19,0.2)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7),0_0_100px_rgba(19,236,19,0.4)] hover:scale-105'
+                    : 'rounded-full bg-primary hover:bg-[#3bf03b] text-green-950 shadow-[0_0_30px_rgba(19,236,19,0.5),0_0_60px_rgba(19,236,19,0.3)] hover:shadow-[0_0_50px_rgba(19,236,19,0.8),0_0_100px_rgba(19,236,19,0.5)] hover:scale-105'
                 }`}
               >
                 <span className="truncate relative z-10">Complete Registration</span>
@@ -872,7 +872,7 @@ const Register: React.FC = () => {
             }`}>
               Already registered? 
               <Link to="/login" className={`font-bold hover:underline ml-1 ${
-                isDarkMode ? 'text-[#13ec13]' : 'text-green-600'
+                isDarkMode ? 'text-primary' : 'text-green-600'
               }`}>
                 Sign In
               </Link>
@@ -885,4 +885,5 @@ const Register: React.FC = () => {
 };
 
 export default Register;
+
 

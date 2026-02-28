@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
@@ -11,17 +13,6 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [emailError, setEmailError] = useState<string>('');
-  
-  // Initialize theme from localStorage, default to dark mode (true)
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'light' ? false : true;
-  });
-
-  // Persist theme changes to localStorage
-  useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -63,14 +54,14 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={`flex min-h-screen w-full overflow-hidden ${isDarkMode ? 'bg-[#111811]' : 'bg-white'} relative`}>
+    <div className={`flex min-h-screen w-full overflow-hidden ${isDarkMode ? 'bg-background-dark' : 'bg-white'} relative transition-colors duration-300`}>
       {/* Theme Toggle Button */}
       <button
-        onClick={() => setIsDarkMode(!isDarkMode)}
+        onClick={toggleTheme}
         className={`absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg ${
           isDarkMode 
-            ? 'bg-[#1c271c] border border-[#3b543b] text-[#13ec13] hover:bg-[#152015]' 
-            : 'bg-white border border-slate-200 text-primary hover:bg-slate-50'
+            ? 'bg-surface-dark border border-[#3b543b] text-primary hover:bg-[#152015]' 
+            : 'bg-white border border-slate-200 text-green-600 hover:bg-slate-50'
         }`}
         aria-label="Toggle theme"
       >
@@ -84,7 +75,7 @@ const Login: React.FC = () => {
       </button>
 
       {/* Left Side: Visual Hero */}
-      <div className={`hidden lg:flex lg:w-1/2 relative ${isDarkMode ? 'bg-[#111f10]' : 'bg-emerald-50'} items-center justify-center overflow-hidden`}>
+      <div className={`hidden lg:flex lg:w-1/2 relative ${isDarkMode ? 'bg-[#111f10]' : 'bg-emerald-50'} items-center justify-center overflow-hidden transition-colors duration-300`}>
         {/* Background Image */}
         <img
           className={`absolute inset-0 h-full w-full object-cover hover:scale-105 transition-transform duration-2000 ${
@@ -100,7 +91,7 @@ const Login: React.FC = () => {
           <div className="mb-6 flex justify-center">
             <div className={`flex h-20 w-20 items-center justify-center rounded-full backdrop-blur-sm animate-pulse-slow ${
               isDarkMode 
-                ? 'bg-[#13ec13]/10 border border-[#13ec13]/20 text-[#13ec13] shadow-[0_0_40px_rgba(19,236,19,0.4),0_0_80px_rgba(19,236,19,0.2)] hover:shadow-[0_0_60px_rgba(19,236,19,0.6),0_0_100px_rgba(19,236,19,0.3)]' 
+                ? 'bg-primary/10 border border-primary/20 text-primary shadow-[0_0_40px_rgba(19,236,19,0.4),0_0_80px_rgba(19,236,19,0.2)] hover:shadow-[0_0_60px_rgba(19,236,19,0.6),0_0_100px_rgba(19,236,19,0.3)]' 
                 : 'bg-white/60 border border-green-600/20 text-green-600 shadow-[0_0_30px_rgba(22,163,74,0.3)] hover:shadow-[0_0_45px_rgba(22,163,74,0.5)]'
             } transition-all duration-500`}>
               <svg className="w-12 h-12 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,8 +111,8 @@ const Login: React.FC = () => {
       </div>
 
       {/* Right Side: Login Form */}
-      <div className={`w-full lg:w-1/2 flex flex-col items-center justify-center px-4 py-12 relative ${
-        isDarkMode ? 'bg-[#111811]' : 'bg-white'
+      <div className={`w-full lg:w-1/2 flex flex-col items-center justify-center px-4 py-12 relative transition-colors duration-300 ${
+        isDarkMode ? 'bg-background-dark' : 'bg-white'
       }`}>
         {/* Background Pattern for light mode */}
         <div className={`absolute inset-0 pointer-events-none ${
@@ -138,7 +129,7 @@ const Login: React.FC = () => {
             }`}>
               <div className={`flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm group cursor-pointer ${
                 isDarkMode 
-                  ? 'bg-[#13ec13]/10 border-[#13ec13]/20 text-[#13ec13] shadow-[0_0_25px_rgba(19,236,19,0.3)] hover:shadow-[0_0_40px_rgba(19,236,19,0.6),0_0_60px_rgba(19,236,19,0.3)]' 
+                  ? 'bg-primary/10 border-primary/20 text-primary shadow-[0_0_25px_rgba(19,236,19,0.3)] hover:shadow-[0_0_40px_rgba(19,236,19,0.6),0_0_60px_rgba(19,236,19,0.3)]' 
                   : 'bg-emerald-50 border-green-600/20 text-green-600 shadow-[0_0_15px_-3px_rgba(22,163,74,0.3)] hover:shadow-[0_0_30px_rgba(22,163,74,0.5)]'
               } transition-all duration-500 hover:scale-110`}>
                 <svg className="w-7 h-7 group-hover:animate-pulse" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -181,7 +172,7 @@ const Login: React.FC = () => {
             <label className="flex flex-col w-full group">
               <p className={`text-base font-medium leading-normal pb-2 transition-colors ${
                 isDarkMode 
-                  ? 'text-white group-focus-within:text-[#13ec13]' 
+                  ? 'text-white group-focus-within:text-primary' 
                   : 'text-slate-700 group-focus-within:text-green-600'
               }`}>
                 Mail
@@ -192,7 +183,7 @@ const Login: React.FC = () => {
                     emailError
                       ? 'border-red-500 bg-red-500/5 focus:border-red-500'
                       : isDarkMode 
-                      ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80' 
+                      ? 'text-white border-[#3b543b] bg-input-dark focus:border-primary focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80' 
                       : 'text-slate-900 border-slate-200 bg-slate-50 focus:border-green-600 focus:bg-white placeholder:text-slate-400 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                   }`}
                   placeholder="mail@hospital.domain"
@@ -203,7 +194,7 @@ const Login: React.FC = () => {
                 />
                 <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
                   isDarkMode 
-                    ? 'text-[#9db99d] group-focus-within:text-[#13ec13]' 
+                    ? 'text-[#9db99d] group-focus-within:text-primary' 
                     : 'text-slate-400 group-focus-within:text-green-600'
                 }`}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,14 +217,14 @@ const Login: React.FC = () => {
               <div className="flex justify-between items-center pb-2">
                 <p className={`text-base font-medium leading-normal transition-colors ${
                   isDarkMode 
-                    ? 'text-white group-focus-within:text-[#13ec13]' 
+                    ? 'text-white group-focus-within:text-primary' 
                     : 'text-slate-700 group-focus-within:text-green-600'
                 }`}>
                   Password
                 </p>
                 <a className={`text-sm font-medium hover:underline ${
                   isDarkMode 
-                    ? 'text-[#13ec13] hover:text-[#3bf03b]' 
+                    ? 'text-primary hover:text-green-400' 
                     : 'text-green-600 hover:text-green-700'
                 }`} href="#">
                   Forgot Password?
@@ -243,7 +234,7 @@ const Login: React.FC = () => {
                 <input
                   className={`flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl focus:outline-0 focus:ring-0 border h-14 px-4 py-4 pl-12 pr-12 text-base font-normal leading-normal transition-all ${
                     isDarkMode 
-                      ? 'text-white border-[#3b543b] bg-[#1c271c] focus:border-[#13ec13] focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80' 
+                      ? 'text-white border-[#3b543b] bg-input-dark focus:border-primary focus:bg-[#152015] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80' 
                       : 'text-slate-900 border-slate-200 bg-slate-50 focus:border-green-600 focus:bg-white placeholder:text-slate-400 focus:shadow-[0_0_15px_rgba(22,163,74,0.15)] hover:border-slate-300'
                   }`}
                   placeholder="Enter your password"
@@ -255,7 +246,7 @@ const Login: React.FC = () => {
                 {/* Leading Icon */}
                 <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors pointer-events-none ${
                   isDarkMode 
-                    ? 'text-[#9db99d] group-focus-within:text-[#13ec13]' 
+                    ? 'text-[#9db99d] group-focus-within:text-primary' 
                     : 'text-slate-400 group-focus-within:text-green-600'
                 }`}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,13 +281,13 @@ const Login: React.FC = () => {
                 disabled={isLoading}
                 className={`flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-5 active:scale-[0.98] transition-all duration-300 text-base font-bold leading-normal tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed relative group ${
                   isDarkMode 
-                    ? 'bg-[#13ec13] hover:bg-[#3bf03b] text-[#111811] shadow-[0_0_30px_rgba(19,236,19,0.4),0_0_60px_rgba(19,236,19,0.2)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7),0_0_100px_rgba(19,236,19,0.4)] hover:scale-105' 
+                    ? 'bg-primary hover:bg-[#3bf03b] text-[#111811] shadow-[0_0_30px_rgba(19,236,19,0.4),0_0_60px_rgba(19,236,19,0.2)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7),0_0_100px_rgba(19,236,19,0.4)] hover:scale-105' 
                     : 'bg-green-600 hover:bg-green-500 text-white shadow-[0_0_25px_rgba(22,163,74,0.4),0_0_50px_rgba(22,163,74,0.2)] hover:shadow-[0_0_40px_rgba(22,163,74,0.6),0_0_80px_rgba(22,163,74,0.3)] hover:scale-105'
                 }`}
               >
                 <span className="truncate relative z-10">{isLoading ? 'Logging in...' : 'Login'}</span>
                 <div className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                  isDarkMode ? 'bg-linear-to-r from-[#13ec13]/20 via-[#3bf03b]/30 to-[#13ec13]/20' : 'bg-linear-to-r from-green-400/20 via-green-500/30 to-green-400/20'
+                  isDarkMode ? 'bg-linear-to-r from-primary/20 via-[#3bf03b]/30 to-primary/20' : 'bg-linear-to-r from-green-400/20 via-green-500/30 to-green-400/20'
                 } animate-shimmer`}></div>
               </button>
             </div>
@@ -309,7 +300,7 @@ const Login: React.FC = () => {
             }`}>
               Don't have an account?
               <Link to="/register" className={`font-bold hover:underline ml-1 ${
-                isDarkMode ? 'text-[#13ec13]' : 'text-green-600'
+                isDarkMode ? 'text-primary' : 'text-green-600'
               }`}>
                 Register
               </Link>

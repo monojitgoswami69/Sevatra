@@ -40,6 +40,15 @@ export interface AdmittedPatient {
   patient_name: string;
   age: number;
   gender: string;
+  blood_group: string | null;
+  emergency_contact: string | null;
+  address: string | null;
+  gov_id_type: string | null;
+  guardian_name: string | null;
+  guardian_relation: string | null;
+  guardian_phone: string | null;
+  guardian_email: string | null;
+  whatsapp_number: string | null;
   bed_id: string;
   admission_date: string;
   heart_rate: number | null;

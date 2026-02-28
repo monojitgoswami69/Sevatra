@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAdmission, getBedStats, type AdmissionPayload } from '../../services/admissionService';
 import { calculateSeverityScore as calculateSeverity } from '../../utils/severityCalculator';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { useNavbar } from '../../context/NavbarContext';
 
 interface VitalsData {
   heartRate: string;
@@ -68,6 +69,30 @@ const NewAdmission: React.FC = () => {
     whatsappNumber: '',
     address: '',
   });
+
+  const [relationOpen, setRelationOpen] = useState(false);
+  const relationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (relationRef.current && !relationRef.current.contains(e.target as Node)) setRelationOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const [govIdTypeOpen, setGovIdTypeOpen] = useState(false);
+  const govIdTypeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (govIdTypeRef.current && !govIdTypeRef.current.contains(e.target as Node)) {
+        setGovIdTypeOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,121 +241,43 @@ const NewAdmission: React.FC = () => {
     }
   };
 
+  // Inject title and actions into DashboardLayout top navbar
+  const { setNavTitle, setNavActions } = useNavbar();
+  const cancelRef = useRef(handleCancel);
+  cancelRef.current = handleCancel;
+  const saveRef = useRef(handleSaveAdmission);
+  saveRef.current = handleSaveAdmission;
+
+  useEffect(() => {
+    setNavTitle(
+      <span className="text-lg font-bold tracking-tight">Admit Patient</span>
+    );
+    setNavActions(
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => cancelRef.current()}
+          className="flex items-center justify-center rounded-xl h-9 px-5 border border-border bg-card text-card-foreground text-sm font-semibold hover:bg-muted transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => saveRef.current()}
+          className="flex items-center justify-center rounded-xl h-9 px-5 bg-primary text-green-950 text-sm font-bold hover:bg-[#3bf03b] shadow-md shadow-primary/20 hover:scale-105 transition-all duration-200"
+        >
+          Save Admission
+        </button>
+      </div>
+    );
+    return () => { setNavTitle(null); setNavActions(null); };
+  }, []);
+
   return (
     <DashboardLayout>
-    <div className="min-h-screen flex flex-col bg-[#111811] text-white font-display">
-      <style>
-        {`
-          /* Hide number input spinners */
-          input[type=number]::-webkit-inner-spin-button,
-          input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-          }
-          input[type=number] {
-            -moz-appearance: textfield;
-          }
-
-          /* Modal animations */
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-
-          @keyframes slideUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px) scale(0.95);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-
-          .animate-fadeIn {
-            animation: fadeIn 0.2s ease-out;
-          }
-
-          .animate-slideUp {
-            animation: slideUp 0.3s ease-out;
-          }
-        `}
-      </style>
-      {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-[#3b543b]/30 bg-[#111811]/95 backdrop-blur-md px-4 sm:px-10 py-3">
-        <div className="flex items-center gap-4 text-white">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border shadow-sm group cursor-pointer bg-[#13ec13]/10 border-[#13ec13]/20 text-[#13ec13] shadow-[0_0_25px_rgba(19,236,19,0.3)] hover:shadow-[0_0_40px_rgba(19,236,19,0.6),0_0_60px_rgba(19,236,19,0.3)] transition-all duration-500 hover:scale-110">
-            <svg 
-              className="w-6 h-6 group-hover:animate-pulse" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth="2.5" 
-              viewBox="0 0 24 24" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold leading-tight tracking-tight text-white">
-            Lifesevatra
-          </h2>
-        </div>
-        <div className="flex flex-1 justify-end gap-4 sm:gap-8 items-center">
-          <div className="hidden sm:flex gap-3">
-            <button
-              onClick={handleCancel}
-              disabled={isLoading}
-              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-[#1c271c] border border-[#3b543b] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#152015] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="truncate">Cancel</span>
-            </button>
-            <button
-              onClick={handleSaveAdmission}
-              disabled={isLoading}
-              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-[#13ec13] hover:bg-[#3bf03b] text-green-950 text-sm font-bold leading-normal tracking-[0.015em] transition-all duration-300 shadow-[0_0_30px_rgba(19,236,19,0.4),0_0_60px_rgba(19,236,19,0.2)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7),0_0_100px_rgba(19,236,19,0.4)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              {isLoading ? (
-                <>
-                  <span className="animate-spin mr-2">⏳</span>
-                  <span className="truncate">Saving...</span>
-                </>
-              ) : (
-                <span className="truncate">Save Admission</span>
-              )}
-            </button>
-          </div>
-          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-[#3b543b] flex items-center justify-center bg-[#1c271c]">
-            <span className="material-symbols-outlined text-[#13ec13] text-2xl">person</span>
-          </div>
-        </div>
-      </header>
+    <div className="flex flex-col font-display">
 
       {/* Main Content */}
-      <main className="flex-1 flex justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[1200px] flex flex-col gap-8">
-          {/* Page Header */}
-          <div className="flex flex-col gap-2 border-b border-[#3b543b]/30 pb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#13ec13]/10 border border-[#13ec13]/20 text-[#13ec13] shadow-[0_0_15px_rgba(19,236,19,0.2)] hover:scale-110 transition-all cursor-pointer">
-                <span className="material-symbols-outlined">person_add</span>
-              </div>
-              <h1 className="text-white text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
-                New Patient Admission
-              </h1>
-            </div>
-            <p className="text-gray-400 text-base font-normal leading-normal max-w-2xl">
-              Enter patient details, medical history, and current vitals to assess severity and
-              allocate appropriate bed resources.
-            </p>
-          </div>
-
+      <main className="flex-1 p-3">
+        <div className="w-full flex flex-col gap-4">
           {/* Status Messages */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-start gap-3">
@@ -349,10 +296,10 @@ const NewAdmission: React.FC = () => {
           )}
 
           {successMessage && (
-            <div className="bg-[#13ec13]/10 border border-[#13ec13]/50 rounded-xl p-4 flex items-start gap-3">
-              <span className="material-symbols-outlined text-[#13ec13]">check_circle</span>
+            <div className="bg-primary/10 border border-primary/50 rounded-xl p-4 flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary">check_circle</span>
               <div className="flex-1">
-                <h3 className="text-[#13ec13] font-bold mb-1">Success!</h3>
+                <h3 className="text-primary font-bold mb-1">Success!</h3>
                 <p className="text-gray-300 text-sm">{successMessage}</p>
                 <p className="text-gray-400 text-xs mt-1">Redirecting to overview...</p>
               </div>
@@ -366,22 +313,22 @@ const NewAdmission: React.FC = () => {
               {/* Patient Demographics */}
               <section className="flex flex-col gap-4">
                 <div className="flex items-center gap-2 px-1">
-                  <div className="p-2 rounded-lg bg-[#13ec13]/10 border border-[#13ec13]/20 shadow-[0_0_10px_rgba(19,236,19,0.15)]">
-                    <span className="material-symbols-outlined text-[#13ec13] text-xl">badge</span>
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 shadow-[0_0_10px_rgba(19,236,19,0.15)]">
+                    <span className="material-symbols-outlined text-primary text-xl">badge</span>
                   </div>
                   <div>
                     <h2 className="text-white text-xl font-bold leading-tight">Patient Demographics</h2>
-                    <p className="text-xs text-[#9db99d]">Required information</p>
+                    <p className="text-xs text-muted-foreground">Required information</p>
                   </div>
                 </div>
-                <div className="bg-[#1c271c] rounded-2xl p-6 border border-[#3b543b] shadow-lg hover:border-[#13ec13]/30 transition-all">
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-lg hover:border-primary/30 transition-all">
                   <div className="grid grid-cols-2 gap-4">
                     <label className="col-span-2 flex flex-col">
                       <span className="text-slate-300 text-sm font-semibold pb-2 ml-1 flex items-center gap-1">
                         Patient Name <span className="text-red-400">*</span>
                       </span>
                       <input
-                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
                         placeholder="Enter full name"
                         type="text"
                         value={patientData.name}
@@ -393,7 +340,7 @@ const NewAdmission: React.FC = () => {
                         Age <span className="text-red-400">*</span>
                       </span>
                       <input
-                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         placeholder="Years"
                         type="number"
                         value={patientData.age}
@@ -414,7 +361,7 @@ const NewAdmission: React.FC = () => {
                               checked={patientData.gender === gender}
                               onChange={() => handlePatientDataChange('gender', gender)}
                             />
-                            <div className="flex items-center justify-center rounded-lg border border-[#3b543b] bg-[#152015] h-11 text-[#9db99d] text-xs font-bold transition-all peer-checked:border-[#13ec13] peer-checked:text-[#13ec13] peer-checked:bg-[#13ec13]/10 peer-checked:shadow-[0_0_10px_rgba(19,236,19,0.2)] hover:border-[#3b543b]/80">
+                            <div className="flex items-center justify-center rounded-lg border border-border bg-muted h-11 text-muted-foreground text-xs font-bold transition-all peer-checked:border-primary peer-checked:text-primary peer-checked:bg-primary/10 peer-checked:shadow-[0_0_10px_rgba(19,236,19,0.2)] hover:border-border/80">
                               <span className="capitalize">{gender}</span>
                             </div>
                           </label>
@@ -426,19 +373,19 @@ const NewAdmission: React.FC = () => {
                         Blood Group <span className="text-red-400">*</span>
                       </span>
                       <select
-                        className="form-select block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
+                        className="form-select block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
                         value={patientData.bloodGroup}
                         onChange={(e) => handlePatientDataChange('bloodGroup', e.target.value)}
                       >
-                        <option value="" className="bg-[#152015] text-gray-400">Select blood group</option>
-                        <option value="A+" className="bg-[#152015] text-white">A+</option>
-                        <option value="A-" className="bg-[#152015] text-white">A-</option>
-                        <option value="B+" className="bg-[#152015] text-white">B+</option>
-                        <option value="B-" className="bg-[#152015] text-white">B-</option>
-                        <option value="AB+" className="bg-[#152015] text-white">AB+</option>
-                        <option value="AB-" className="bg-[#152015] text-white">AB-</option>
-                        <option value="O+" className="bg-[#152015] text-white">O+</option>
-                        <option value="O-" className="bg-[#152015] text-white">O-</option>
+                        <option value="" className="bg-muted text-gray-400">Select blood group</option>
+                        <option value="A+" className="bg-muted text-card-foreground">A+</option>
+                        <option value="A-" className="bg-muted text-card-foreground">A-</option>
+                        <option value="B+" className="bg-muted text-card-foreground">B+</option>
+                        <option value="B-" className="bg-muted text-card-foreground">B-</option>
+                        <option value="AB+" className="bg-muted text-card-foreground">AB+</option>
+                        <option value="AB-" className="bg-muted text-card-foreground">AB-</option>
+                        <option value="O+" className="bg-muted text-card-foreground">O+</option>
+                        <option value="O-" className="bg-muted text-card-foreground">O-</option>
                       </select>
                     </label>
                     <label className="flex flex-col">
@@ -446,7 +393,7 @@ const NewAdmission: React.FC = () => {
                         Emergency Contact <span className="text-red-400">*</span>
                       </span>
                       <input
-                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                        className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
                         placeholder="Phone number"
                         type="tel"
                         value={patientData.emergencyContact}
@@ -466,25 +413,25 @@ const NewAdmission: React.FC = () => {
                     </div>
                     <div>
                       <h2 className="text-white text-xl font-bold leading-tight">Current Vitals</h2>
-                      <p className="text-xs text-[#9db99d]">Live patient monitoring</p>
+                      <p className="text-xs text-muted-foreground">Live patient monitoring</p>
                     </div>
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#13ec13] bg-[#13ec13]/10 px-2.5 py-1 rounded-full border border-[#13ec13]/20">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
                     Live
                   </span>
                 </div>
-                <div className="bg-[#1c271c] rounded-2xl p-6 border border-[#3b543b] shadow-lg hover:border-red-500/30 transition-all relative overflow-hidden">
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-lg hover:border-red-500/30 transition-all relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                   <div className="grid grid-cols-2 gap-3 relative z-10">
                     {/* Heart Rate */}
-                    <div className="bg-[#152015] p-4 rounded-xl border border-[#3b543b] hover:border-red-500/50 transition-all group">
+                    <div className="bg-muted p-4 rounded-xl border border-border hover:border-red-500/50 transition-all group">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-400 text-xs font-medium">Heart Rate</span>
                         <span className="material-symbols-outlined text-red-500 text-lg">favorite</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none"
                           placeholder="--"
                           type="number"
                           value={vitals.heartRate}
@@ -495,14 +442,14 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* SpO2 */}
-                    <div className="bg-[#152015] p-4 rounded-xl border border-[#3b543b] hover:border-blue-500/50 transition-all group">
+                    <div className="bg-muted p-4 rounded-xl border border-border hover:border-blue-500/50 transition-all group">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-400 text-xs font-medium">SpO2</span>
                         <span className="material-symbols-outlined text-blue-400 text-lg">water_drop</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none"
                           placeholder="--"
                           type="number"
                           value={vitals.spo2}
@@ -513,14 +460,14 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* Respiratory Rate */}
-                    <div className="bg-[#152015] p-4 rounded-xl border border-[#3b543b] hover:border-white/30 transition-all group">
+                    <div className="bg-muted p-4 rounded-xl border border-border hover:border-white/30 transition-all group">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-400 text-xs font-medium">Resp. Rate</span>
-                        <span className="material-symbols-outlined text-white/50 text-lg">air</span>
+                        <span className="material-symbols-outlined text-card-foreground/50 text-lg">air</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none"
                           placeholder="--"
                           type="number"
                           value={vitals.respRate}
@@ -531,14 +478,14 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* Temperature */}
-                    <div className="bg-[#152015] p-4 rounded-xl border border-[#3b543b] hover:border-orange-500/50 transition-all group">
+                    <div className="bg-muted p-4 rounded-xl border border-border hover:border-orange-500/50 transition-all group">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-400 text-xs font-medium">Temperature</span>
                         <span className="material-symbols-outlined text-orange-400 text-lg">thermostat</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none"
                           placeholder="--"
                           type="number"
                           value={vitals.temperature}
@@ -549,14 +496,14 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* Blood Pressure */}
-                    <div className="col-span-2 bg-[#152015] p-4 rounded-xl border border-[#3b543b] hover:border-[#13ec13]/50 transition-all group">
+                    <div className="col-span-2 bg-muted p-4 rounded-xl border border-border hover:border-primary/50 transition-all group">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-gray-400 text-xs font-medium">Blood Pressure</span>
-                        <span className="material-symbols-outlined text-[#13ec13] text-lg">compress</span>
+                        <span className="material-symbols-outlined text-primary text-lg">compress</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none text-right"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none text-right"
                           placeholder="120"
                           type="number"
                           value={vitals.bpSystolic}
@@ -564,7 +511,7 @@ const NewAdmission: React.FC = () => {
                         />
                         <span className="text-xl text-gray-400 font-light">/</span>
                         <input
-                          className="w-16 bg-transparent text-2xl font-bold text-white placeholder-gray-600 focus:outline-none"
+                          className="w-16 bg-transparent text-2xl font-bold text-card-foreground placeholder-gray-600 focus:outline-none"
                           placeholder="80"
                           type="number"
                           value={vitals.bpDiastolic}
@@ -586,10 +533,10 @@ const NewAdmission: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-white text-xl font-bold leading-tight">Bed Allocation</h2>
-                    <p className="text-xs text-[#9db99d]">Check availability & severity</p>
+                    <p className="text-xs text-muted-foreground">Check availability & severity</p>
                   </div>
                 </div>
-                <div className="bg-[#13ec13]/10 border border-[#13ec13]/20 rounded-2xl p-6 shadow-[0_0_15px_rgba(19,236,19,0.1)] hover:border-[#13ec13]/30 transition-all">
+                <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 shadow-[0_0_15px_rgba(19,236,19,0.1)] hover:border-primary/30 transition-all">
                   <p className="text-gray-300 text-sm mb-4">
                     Based on the vitals entered, the system will calculate severity score and recommend an appropriate ward.
                   </p>
@@ -597,7 +544,7 @@ const NewAdmission: React.FC = () => {
                   <button
                     onClick={handleCheckAvailability}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl h-12 bg-[#13ec13] text-green-950 text-base font-bold hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="w-full flex items-center justify-center gap-2 rounded-xl h-[54px] bg-orange-500 dark:bg-primary text-white dark:text-green-950 text-base font-bold hover:bg-orange-600 dark:hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_25px_rgba(249,115,22,0.35)] dark:shadow-[0_0_30px_rgba(19,236,19,0.4)] hover:shadow-[0_0_40px_rgba(249,115,22,0.55)] dark:hover:shadow-[0_0_50px_rgba(19,236,19,0.7)] hover:scale-105 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <span className="material-symbols-outlined">bed</span>
                     <span>{isLoading ? 'Checking...' : 'Check Availability'}</span>
@@ -616,14 +563,14 @@ const NewAdmission: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-white text-xl font-bold leading-tight">Identity & Authority</h2>
-                    <p className="text-xs text-[#9db99d]">Identification & contact details</p>
+                    <p className="text-xs text-muted-foreground">Identification & contact details</p>
                   </div>
                 </div>
-                <div className="bg-[#1c271c] rounded-2xl p-6 border border-[#3b543b] shadow-lg hover:border-blue-500/30 transition-all">
+                <div className="bg-card rounded-2xl p-6 border border-border shadow-lg hover:border-blue-500/30 transition-all">
                   <div className="space-y-5">
                     {/* ID & Patient Pictures */}
                     <div className="space-y-4">
-                      <h3 className="text-[#9db99d] text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                      <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">badge</span>
                         Identification Photos
                       </h3>
@@ -634,7 +581,7 @@ const NewAdmission: React.FC = () => {
                             Patient Picture
                           </span>
                           <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#13ec13] file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
+                            className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
                             type="file"
                             accept="image/*"
                             onChange={(e) => {
@@ -647,34 +594,76 @@ const NewAdmission: React.FC = () => {
                           />
                         </label>
 
-                        <label className="flex flex-col">
+                        <div className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
                             Type of Govt ID
                           </span>
-                          <select
-                            className="form-select block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
-                            value={patientData.govIdType}
-                            onChange={(e) => handlePatientDataChange('govIdType', e.target.value)}
-                          >
-                            <option value="" className="bg-[#152015] text-gray-400">Select ID type</option>
-                            <option value="ABHA ID" className="bg-[#152015] text-white">ABHA ID (Ayushman Bharat Health Account)</option>
-                            <option value="Ayushman Bharat / PM-JAY Card" className="bg-[#152015] text-white">Ayushman Bharat / PM-JAY Card</option>
-                            <option value="Aadhaar Card" className="bg-[#152015] text-white">Aadhaar Card</option>
-                            <option value="Passport" className="bg-[#152015] text-white">Passport</option>
-                            <option value="Voter ID" className="bg-[#152015] text-white">Voter ID</option>
-                            <option value="Driving License" className="bg-[#152015] text-white">Driving License</option>
-                            <option value="Swasthya Sathi" className="bg-[#152015] text-white">Swasthya Sathi</option>
-                            <option value="Aarogyasri" className="bg-[#152015] text-white">Aarogyasri</option>
-                            <option value="ESI Card" className="bg-[#152015] text-white">ESI Card</option>
-                          </select>
-                        </label>
+                          <div className="relative" ref={govIdTypeRef}>
+                            <button
+                              type="button"
+                              onClick={() => setGovIdTypeOpen(o => !o)}
+                              className="w-full flex items-center justify-between rounded-xl border px-4 py-3 transition-all shadow-sm text-left bg-muted border-border hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
+                            >
+                              <span className={`flex items-center gap-2 text-sm ${patientData.govIdType ? 'text-card-foreground' : 'text-muted-foreground'}`}>
+                                {patientData.govIdType ? (
+                                  <>
+                                    <span className="material-symbols-outlined text-primary text-base">
+                                      {patientData.govIdType === 'ABHA ID' ? 'health_and_safety' :
+                                       patientData.govIdType === 'Ayushman Bharat / PM-JAY Card' ? 'medical_services' :
+                                       patientData.govIdType === 'Aadhaar Card' ? 'fingerprint' :
+                                       patientData.govIdType === 'Passport' ? 'travel_explore' :
+                                       patientData.govIdType === 'Voter ID' ? 'how_to_vote' :
+                                       patientData.govIdType === 'Driving License' ? 'drive_eta' :
+                                       'badge'}
+                                    </span>
+                                    {patientData.govIdType}
+                                  </>
+                                ) : 'Select ID type'}
+                              </span>
+                              <span className={`material-symbols-outlined text-muted-foreground text-base transition-transform duration-200 ${govIdTypeOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                            </button>
+                            {govIdTypeOpen && (
+                              <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+                                {([
+                                  { value: 'ABHA ID', label: 'ABHA ID', sub: 'Ayushman Bharat Health Account', icon: 'health_and_safety' },
+                                  { value: 'Ayushman Bharat / PM-JAY Card', label: 'Ayushman Bharat / PM-JAY Card', sub: 'Government health scheme', icon: 'medical_services' },
+                                  { value: 'Aadhaar Card', label: 'Aadhaar Card', sub: 'UIDAI identity document', icon: 'fingerprint' },
+                                  { value: 'Passport', label: 'Passport', sub: 'International travel document', icon: 'travel_explore' },
+                                  { value: 'Voter ID', label: 'Voter ID', sub: 'Election commission card', icon: 'how_to_vote' },
+                                  { value: 'Driving License', label: 'Driving License', sub: 'Motor vehicle authority', icon: 'drive_eta' },
+                                  { value: 'Swasthya Sathi', label: 'Swasthya Sathi', sub: 'West Bengal health scheme', icon: 'local_hospital' },
+                                  { value: 'Aarogyasri', label: 'Aarogyasri', sub: 'Andhra Pradesh health scheme', icon: 'healing' },
+                                  { value: 'ESI Card', label: 'ESI Card', sub: 'Employee state insurance', icon: 'badge' },
+                                ] as { value: string; label: string; sub: string; icon: string }[]).map((opt) => (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => { handlePatientDataChange('govIdType', opt.value); setGovIdTypeOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted transition-colors ${
+                                      patientData.govIdType === opt.value ? 'bg-primary/10 text-primary' : 'text-card-foreground'
+                                    }`}
+                                  >
+                                    <span className={`material-symbols-outlined text-lg ${patientData.govIdType === opt.value ? 'text-primary' : 'text-muted-foreground'}`}>{opt.icon}</span>
+                                    <div>
+                                      <p className="text-sm font-medium leading-tight">{opt.label}</p>
+                                      <p className="text-[11px] text-muted-foreground">{opt.sub}</p>
+                                    </div>
+                                    {patientData.govIdType === opt.value && (
+                                      <span className="material-symbols-outlined text-primary text-base ml-auto">check</span>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
                         <label className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
                             Upload Govt. ID
                           </span>
                           <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#13ec13] file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
+                            className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
                             type="file"
                             accept="image/*"
                             onChange={(e) => {
@@ -690,45 +679,95 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* Guardian Information */}
-                    <div className="space-y-4 pt-4 border-t border-[#3b543b]/50">
-                      <h3 className="text-[#9db99d] text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <div className="space-y-4 pt-4 border-t border-border">
+                      <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">family_restroom</span>
                         Guardian / Emergency Contact
                       </h3>
                       
                       <div className="space-y-3">
-                        <label className="flex flex-col">
-                          <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
-                            Guardian Name
-                          </span>
-                          <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
-                            placeholder="Full name"
-                            type="text"
-                            value={patientData.guardianName}
-                            onChange={(e) => handlePatientDataChange('guardianName', e.target.value)}
-                          />
-                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="flex flex-col">
+                            <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
+                              Guardian Name
+                            </span>
+                            <input
+                              className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                              placeholder="Full name"
+                              type="text"
+                              value={patientData.guardianName}
+                              onChange={(e) => handlePatientDataChange('guardianName', e.target.value)}
+                            />
+                          </label>
 
-                        <label className="flex flex-col">
-                          <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
-                            Relationship with patient
-                          </span>
-                          <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
-                            placeholder="e.g., Parent"
-                            type="text"
-                            value={patientData.guardianRelation}
-                            onChange={(e) => handlePatientDataChange('guardianRelation', e.target.value)}
-                          />
-                        </label>
+                          <div className="flex flex-col">
+                            <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
+                              Relationship with patient
+                            </span>
+                            <div className="relative" ref={relationRef}>
+                              <button
+                                type="button"
+                                onClick={() => setRelationOpen(o => !o)}
+                                className="w-full flex items-center justify-between rounded-xl border px-4 py-3 transition-all shadow-sm text-left bg-muted border-border hover:border-primary focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] cursor-pointer"
+                              >
+                                <span className={`flex items-center gap-2 text-sm ${patientData.guardianRelation ? 'text-card-foreground' : 'text-muted-foreground'}`}>
+                                  {patientData.guardianRelation ? (
+                                    <>
+                                      <span className="material-symbols-outlined text-primary text-base">
+                                        {patientData.guardianRelation === 'Father' ? 'man' :
+                                         patientData.guardianRelation === 'Mother' ? 'woman' :
+                                         patientData.guardianRelation === 'Spouse' ? 'favorite' :
+                                         patientData.guardianRelation === 'Sibling' ? 'people' :
+                                         patientData.guardianRelation === 'Child' ? 'child_care' :
+                                         patientData.guardianRelation === 'Friend' ? 'group' : 'person'}
+                                      </span>
+                                      {patientData.guardianRelation}
+                                    </>
+                                  ) : 'Select relationship'}
+                                </span>
+                                <span className={`material-symbols-outlined text-muted-foreground text-base transition-transform duration-200 ${relationOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                              </button>
+                              {relationOpen && (
+                                <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+                                  {([
+                                    { value: 'Father', icon: 'man', sub: 'Parent (male)' },
+                                    { value: 'Mother', icon: 'woman', sub: 'Parent (female)' },
+                                    { value: 'Spouse', icon: 'favorite', sub: 'Husband / Wife / Partner' },
+                                    { value: 'Sibling', icon: 'people', sub: 'Brother / Sister' },
+                                    { value: 'Child', icon: 'child_care', sub: 'Son / Daughter' },
+                                    { value: 'Friend', icon: 'group', sub: 'Close friend' },
+                                    { value: 'Other', icon: 'person', sub: 'Other relationship' },
+                                  ] as { value: string; icon: string; sub: string }[]).map((opt) => (
+                                    <button
+                                      key={opt.value}
+                                      type="button"
+                                      onClick={() => { handlePatientDataChange('guardianRelation', opt.value); setRelationOpen(false); }}
+                                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-muted transition-colors ${
+                                        patientData.guardianRelation === opt.value ? 'bg-primary/10 text-primary' : 'text-card-foreground'
+                                      }`}
+                                    >
+                                      <span className={`material-symbols-outlined text-lg ${patientData.guardianRelation === opt.value ? 'text-primary' : 'text-muted-foreground'}`}>{opt.icon}</span>
+                                      <div>
+                                        <p className="text-sm font-medium leading-tight">{opt.value}</p>
+                                        <p className="text-[11px] text-muted-foreground">{opt.sub}</p>
+                                      </div>
+                                      {patientData.guardianRelation === opt.value && (
+                                        <span className="material-symbols-outlined text-primary text-base ml-auto">check</span>
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
                         <label className="flex flex-col">
                           <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
                             Guardian Contact
                           </span>
                           <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
                             placeholder="Phone number"
                             type="tel"
                             value={patientData.guardianPhone}
@@ -741,7 +780,7 @@ const NewAdmission: React.FC = () => {
                             Guardian Email
                           </span>
                           <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
                             placeholder="Email address"
                             type="email"
                             value={patientData.guardianEmail}
@@ -754,7 +793,7 @@ const NewAdmission: React.FC = () => {
                             WhatsApp (optional)
                           </span>
                           <input
-                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
+                            className="form-input block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)]"
                             placeholder="WhatsApp number"
                             type="tel"
                             value={patientData.whatsappNumber}
@@ -765,8 +804,8 @@ const NewAdmission: React.FC = () => {
                     </div>
 
                     {/* Address */}
-                    <div className="space-y-4 pt-4 border-t border-[#3b543b]/50">
-                      <h3 className="text-[#9db99d] text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <div className="space-y-4 pt-4 border-t border-border">
+                      <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">home</span>
                         Address
                       </h3>
@@ -776,7 +815,7 @@ const NewAdmission: React.FC = () => {
                           Full Address
                         </span>
                         <textarea
-                          className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[99px]"
+                          className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[99px]"
                           placeholder="Street, city, state, postal code"
                           value={patientData.address}
                           onChange={(e) => handlePatientDataChange('address', e.target.value)}
@@ -797,17 +836,17 @@ const NewAdmission: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-white text-xl font-bold leading-tight">Clinical Information</h2>
-                <p className="text-xs text-[#9db99d]">Medical details & notes</p>
+                <p className="text-xs text-muted-foreground">Medical details & notes</p>
               </div>
             </div>
-            <div className="bg-[#1c271c] rounded-2xl p-6 border border-[#3b543b] shadow-lg hover:border-cyan-500/30 transition-all">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-lg hover:border-cyan-500/30 transition-all">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <label className="flex flex-col">
                   <span className="text-slate-300 text-sm font-semibold pb-2 ml-1">
                     Presenting Ailment
                   </span>
                   <textarea
-                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
+                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
                     placeholder="Current symptoms and complaints..."
                     value={patientData.presentingAilment}
                     onChange={(e) =>
@@ -820,7 +859,7 @@ const NewAdmission: React.FC = () => {
                     Clinical Notes
                   </span>
                   <textarea
-                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
+                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
                     placeholder="Doctor's observations..."
                     value={patientData.clinicalNotes}
                     onChange={(e) => handlePatientDataChange('clinicalNotes', e.target.value)}
@@ -831,7 +870,7 @@ const NewAdmission: React.FC = () => {
                     Medical History
                   </span>
                   <textarea
-                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
+                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
                     placeholder="Previous conditions, surgeries, allergies..."
                     value={patientData.medicalHistory}
                     onChange={(e) =>
@@ -844,7 +883,7 @@ const NewAdmission: React.FC = () => {
                     Lab Results Summary
                   </span>
                   <textarea
-                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-white border-[#3b543b] bg-[#152015] focus:border-[#13ec13] focus:bg-[#111811] placeholder:text-[#9db99d] focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
+                    className="form-textarea block w-full rounded-xl border px-4 py-3 placeholder:text-gray-500 transition-all resize-y shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted placeholder:text-muted-foreground focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] min-h-[85px]"
                     placeholder="Key findings from blood work..."
                     value={patientData.labResults}
                     onChange={(e) => handlePatientDataChange('labResults', e.target.value)}
@@ -859,27 +898,27 @@ const NewAdmission: React.FC = () => {
       {/* Bed Availability Card Modal */}
       {bedAvailability && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#1c271c] rounded-2xl border-2 border-[#3b543b] shadow-2xl max-w-lg w-full transform transition-all animate-slideUp">
+          <div className="bg-card rounded-2xl border-2 border-border shadow-2xl max-w-lg w-full transform transition-all animate-slideUp">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-[#3b543b]/50">
+            <div className="flex items-center justify-between p-6 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
                   <span className="material-symbols-outlined text-purple-400 text-xl">bed</span>
                 </div>
-                <h3 className="text-xl font-bold text-white">Bed Availability Results</h3>
+                <h3 className="text-xl font-bold text-card-foreground">Bed Availability Results</h3>
               </div>
               <button
                 onClick={() => setBedAvailability(null)}
                 className="p-2 rounded-lg hover:bg-[#3b543b]/30 transition-colors"
               >
-                <span className="material-symbols-outlined text-gray-400 hover:text-white">close</span>
+                <span className="material-symbols-outlined text-gray-400 hover:text-card-foreground">close</span>
               </button>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-4">
               {/* Severity Score */}
-              <div className="p-4 bg-[#152015] rounded-xl border border-[#3b543b]">
+              <div className="p-4 bg-muted rounded-xl border border-border">
                 <div className="flex justify-between items-center">
                   <div>
                     <span className="text-gray-400 text-xs uppercase tracking-wide">Severity Score</span>
@@ -887,7 +926,7 @@ const NewAdmission: React.FC = () => {
                       bedAvailability.severityScore >= 8 ? 'text-red-500' :
                       bedAvailability.severityScore >= 5 ? 'text-orange-400' :
                       bedAvailability.severityScore >= 3 ? 'text-yellow-400' :
-                      'text-[#13ec13]'
+                      'text-primary'
                     }`}>
                       {bedAvailability.severityScore}/10
                     </div>
@@ -896,13 +935,13 @@ const NewAdmission: React.FC = () => {
                     bedAvailability.severityScore >= 8 ? 'bg-red-500/10' :
                     bedAvailability.severityScore >= 5 ? 'bg-orange-500/10' :
                     bedAvailability.severityScore >= 3 ? 'bg-yellow-500/10' :
-                    'bg-[#13ec13]/10'
+                    'bg-primary/10'
                   }`}>
                     <span className={`material-symbols-outlined text-3xl ${
                       bedAvailability.severityScore >= 8 ? 'text-red-500' :
                       bedAvailability.severityScore >= 5 ? 'text-orange-400' :
                       bedAvailability.severityScore >= 3 ? 'text-yellow-400' :
-                      'text-[#13ec13]'
+                      'text-primary'
                     }`}>
                       {bedAvailability.severityScore >= 8 ? 'emergency' :
                        bedAvailability.severityScore >= 5 ? 'warning' :
@@ -914,9 +953,9 @@ const NewAdmission: React.FC = () => {
               </div>
 
               {/* Recommended Ward */}
-              <div className="p-4 bg-[#152015] rounded-xl border border-[#3b543b]">
+              <div className="p-4 bg-muted rounded-xl border border-border">
                 <span className="text-gray-400 text-xs uppercase tracking-wide">Recommended Ward</span>
-                <div className="text-2xl font-bold text-white mt-1">{bedAvailability.recommendedWard}</div>
+                <div className="text-2xl font-bold text-card-foreground mt-1">{bedAvailability.recommendedWard}</div>
               </div>
 
               {/* Allocated Bed - Main Result */}
@@ -924,20 +963,20 @@ const NewAdmission: React.FC = () => {
                 bedAvailability.status === 'alert' ? 'bg-red-500/10 border-red-500/50' :
                 bedAvailability.status === 'waiting' ? 'bg-yellow-500/10 border-yellow-500/50' :
                 bedAvailability.status === 'shifted' ? 'bg-orange-500/10 border-orange-500/50' :
-                'bg-[#13ec13]/10 border-[#13ec13]/50'
+                'bg-primary/10 border-primary/50'
               }`}>
                 <div className="flex items-start gap-4">
                   <div className={`p-3 rounded-xl flex-shrink-0 ${
                     bedAvailability.status === 'alert' ? 'bg-red-500/20' :
                     bedAvailability.status === 'waiting' ? 'bg-yellow-500/20' :
                     bedAvailability.status === 'shifted' ? 'bg-orange-500/20' :
-                    'bg-[#13ec13]/20'
+                    'bg-primary/20'
                   }`}>
                     <span className={`material-symbols-outlined text-3xl ${
                       bedAvailability.status === 'alert' ? 'text-red-500 animate-pulse' :
                       bedAvailability.status === 'waiting' ? 'text-yellow-400' :
                       bedAvailability.status === 'shifted' ? 'text-orange-400' :
-                      'text-[#13ec13]'
+                      'text-primary'
                     }`}>
                       {bedAvailability.status === 'alert' ? 'error' :
                        bedAvailability.status === 'waiting' ? 'schedule' :
@@ -949,7 +988,7 @@ const NewAdmission: React.FC = () => {
                     {bedAvailability.allocatedBed && (
                       <div className="mb-3">
                         <span className="text-gray-400 text-xs uppercase tracking-wide">Allocated Bed ID</span>
-                        <div className="text-3xl font-bold text-white mt-1">
+                        <div className="text-3xl font-bold text-card-foreground mt-1">
                           {bedAvailability.allocatedBed}
                         </div>
                         {bedAvailability.status === 'waiting' && (
@@ -978,10 +1017,10 @@ const NewAdmission: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-[#3b543b]/50 flex gap-3">
+            <div className="p-6 border-t border-border flex gap-3">
               <button
                 onClick={() => setBedAvailability(null)}
-                className="flex-1 rounded-xl h-11 px-6 bg-[#152015] border border-[#3b543b] text-white text-sm font-bold hover:bg-[#1c271c] transition-colors"
+                className="flex-1 rounded-xl h-11 px-6 bg-muted border border-border text-card-foreground text-sm font-bold hover:bg-card transition-colors"
               >
                 Close
               </button>
@@ -990,7 +1029,7 @@ const NewAdmission: React.FC = () => {
                   setBedAvailability(null);
                   // Could trigger save admission here if needed
                 }}
-                className="flex-1 rounded-xl h-11 px-6 bg-[#13ec13] text-green-950 text-sm font-bold hover:bg-[#3bf03b] transition-all shadow-[0_0_20px_rgba(19,236,19,0.3)] hover:shadow-[0_0_30px_rgba(19,236,19,0.5)]"
+                className="flex-1 rounded-xl h-11 px-6 bg-primary text-green-950 text-sm font-bold hover:bg-[#3bf03b] transition-all shadow-[0_0_20px_rgba(19,236,19,0.3)] hover:shadow-[0_0_30px_rgba(19,236,19,0.5)]"
               >
                 Proceed with Admission
               </button>
@@ -1004,3 +1043,4 @@ const NewAdmission: React.FC = () => {
 };
 
 export default NewAdmission;
+

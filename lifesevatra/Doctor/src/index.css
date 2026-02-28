@@ -2,9 +2,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
+@theme {
+  --color-primary: #13ec13;
+  --color-primary-dark: #0fa80f;
+  --color-background-light: #f8fafc;
+  --color-background-dark: #111811;
+  --color-surface-dark: #1c271c;
+  --color-surface-darker: #0a160a;
+  --color-input-dark: #142614;
+}
+
+/* Semantic design tokens — light defaults, dark overrides */
+:root {
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-fg: #64748b;
+  --input-bg: #f8fafc;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --section-bg: #f8fafc;
+  --row-hover: rgba(0,0,0,0.03);
+}
+
+.dark {
+  --card: #1c271c;
+  --card-foreground: #ffffff;
+  --border: rgba(59,84,59,0.5);
+  --muted: #152015;
+  --muted-fg: #9db99d;
+  --input-bg: #1c271c;
+  --input-border: rgba(59,84,59,0.8);
+  --input-text: #ffffff;
+  --input-placeholder: #9db99d;
+  --section-bg: #152015;
+  --row-hover: rgba(19,236,19,0.04);
+}
+
+@theme inline {
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-section: var(--section-bg);
+}
+
 body {
-  background-color: #0a160a;
   font-family: 'Manrope', sans-serif;
+  @apply bg-background-light text-slate-800 dark:bg-background-dark dark:text-white transition-colors duration-300;
 }
 
 .no-scrollbar::-webkit-scrollbar {

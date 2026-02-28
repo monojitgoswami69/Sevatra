@@ -1,11 +1,11 @@
 /**
  * ╔══════════════════════════════════════════════════════════════════════╗
- * ║                    Severity Score Calculator                        ║
+ * ║                    Severity Score Calculator                         ║
  * ║                                                                      ║
  * ║  Calculates patient severity scores based on vital signs.            ║
  * ║  Used for triage, ward allocation, and clinical decision support.    ║
  * ║                                                                      ║
- * ║  Score Range: 0–10 (sum of 5 sub-scores, each 0–3, capped at 10)   ║
+ * ║  Score Range: 0–10 (sum of 5 sub-scores, each 0–3, capped at 10)     ║
  * ║    0–2  Recovering  → General ward                                   ║
  * ║    3–4  Stable      → General ward                                   ║
  * ║    5–7  Serious     → HDU                                            ║
