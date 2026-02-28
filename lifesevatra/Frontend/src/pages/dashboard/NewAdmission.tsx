@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAdmission, getBedStats, type AdmissionPayload } from '../../services/admissionService';
-import { calculateSeverityScore as calculateSeverity } from './SeverityScore';
+import { calculateSeverityScore as calculateSeverity } from '../../utils/severityCalculator';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 
 interface VitalsData {
@@ -155,11 +155,6 @@ const NewAdmission: React.FC = () => {
 
   const handleCancel = () => {
     navigate('/overview');
-  };
-
-  const handleConnectDevice = () => {
-    console.log('Connecting device...');
-    // Add device connection logic here
   };
 
   const handleCheckAvailability = async () => {
@@ -580,16 +575,6 @@ const NewAdmission: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Connect Device Button */}
-                  <div className="mt-4 pt-4 border-t border-[#3b543b]">
-                    <button
-                      onClick={handleConnectDevice}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl h-11 bg-[#13ec13] text-green-950 text-sm font-bold hover:bg-[#3bf03b] transition-all duration-300 shadow-[0_0_20px_rgba(19,236,19,0.3)] hover:shadow-[0_0_30px_rgba(19,236,19,0.5)] hover:scale-105 active:scale-[0.98]"
-                    >
-                      <span className="material-symbols-outlined text-lg">monitor_heart</span>
-                      <span>Connect Device</span>
-                    </button>
-                  </div>
                 </div>
               </section>
 
