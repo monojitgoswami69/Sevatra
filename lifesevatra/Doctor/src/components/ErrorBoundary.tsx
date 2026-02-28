@@ -31,14 +31,14 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#111811] px-4">
+        <div className="min-h-screen flex items-center justify-center bg-muted px-4">
           <div className="text-center max-w-lg">
             <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-red-500/10 border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.15)]">
               <span className="material-symbols-outlined text-red-500 text-5xl">error</span>
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-3">Something Went Wrong</h1>
-            <p className="text-[#9db99d] mb-4">
+            <h1 className="text-3xl font-bold text-card-foreground mb-3">Something Went Wrong</h1>
+            <p className="text-muted-foreground mb-4">
               An unexpected error occurred. Please try again or return to the dashboard.
             </p>
 
@@ -51,13 +51,13 @@ class ErrorBoundary extends Component<Props, State> {
             <div className="flex items-center justify-center gap-4">
               <button
                 onClick={() => window.location.reload()}
-                className="rounded-xl border border-[#3b543b] bg-[#1c271c] px-6 py-3 text-sm font-bold text-[#9db99d] hover:text-white hover:border-[#13ec13]/50 transition-all"
+                className="rounded-xl border border-border bg-card px-6 py-3 text-sm font-bold text-muted-foreground hover:text-card-foreground hover:border-primary/50 transition-all"
               >
                 Reload Page
               </button>
               <button
                 onClick={this.handleReset}
-                className="rounded-xl bg-[#13ec13] px-6 py-3 text-sm font-bold text-[#111811] hover:bg-[#3bf03b] shadow-[0_0_20px_rgba(19,236,19,0.4)] transition-all"
+                className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-green-950 hover:bg-[#3bf03b] shadow-[0_0_20px_rgba(19,236,19,0.4)] transition-all"
               >
                 Go to Dashboard
               </button>
@@ -72,4 +72,6 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 export default ErrorBoundary;
+
+
 

@@ -18,7 +18,7 @@ const conditionBadge = (c: string) => {
     stable: 'bg-green-500/10 text-green-400 border-green-500/20',
     recovering: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   };
-  return map[c.toLowerCase()] ?? 'bg-[#233523] text-[#9db99d] border-[#3b543b]';
+  return map[c.toLowerCase()] ?? 'bg-muted text-muted-foreground border-border';
 };
 
 const normalRange: Record<string, { label: string; min: number; max: number; unit: string }> = {
@@ -154,7 +154,7 @@ const PatientUpdate: React.FC = () => {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="h-8 w-8 border-2 border-[#13ec13] border-t-transparent rounded-full animate-spin" />
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </DashboardLayout>
     );
@@ -165,9 +165,9 @@ const PatientUpdate: React.FC = () => {
       <DashboardLayout>
         <div className="p-8 flex flex-col items-center justify-center gap-4 text-center">
           <span className="material-symbols-outlined text-5xl text-red-500">error</span>
-          <p className="text-white font-semibold text-lg">Patient Not Found</p>
+          <p className="text-card-foreground font-semibold text-lg">Patient Not Found</p>
           <button onClick={() => navigate('/patients')}
-            className="px-4 py-2 rounded-xl bg-[#1c271c] border border-[#3b543b] text-[#9db99d] hover:text-white text-sm transition-colors">
+            className="px-4 py-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-card-foreground text-sm transition-colors">
             ← Back to Patients
           </button>
         </div>
@@ -190,12 +190,12 @@ const PatientUpdate: React.FC = () => {
         {/* Back + header */}
         <div className="flex items-start gap-4">
           <button onClick={() => navigate('/patients')}
-            className="mt-1 flex items-center justify-center h-10 w-10 rounded-xl bg-[#1c271c] text-[#9db99d] hover:text-white hover:bg-[#233523] transition-colors border border-[#3b543b]/40 flex-shrink-0">
+            className="mt-1 flex items-center justify-center h-10 w-10 rounded-xl bg-card text-muted-foreground hover:text-card-foreground hover:bg-muted transition-colors border border-border flex-shrink-0">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl lg:text-3xl font-bold text-white">{patient.patient_name}</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-card-foreground">{patient.patient_name}</h1>
               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border ${conditionBadge(patient.condition)}`}>
                 {patient.condition === 'Critical' && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
                 {patient.condition}
@@ -203,35 +203,35 @@ const PatientUpdate: React.FC = () => {
               <span className={`rounded-full px-3 py-1 text-xs font-bold border ${
                 patient.severity_score >= 8 ? 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]' :
                 patient.severity_score >= 5 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.2)]' :
-                patient.severity_score >= 3 ? 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/20 shadow-[0_0_10px_rgba(19,236,19,0.2)]' :
+                patient.severity_score >= 3 ? 'bg-primary/10 text-primary border-primary/20 shadow-[0_0_10px_rgba(19,236,19,0.2)]' :
                 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
               }`}>
                 Score: {patient.severity_score}/10
               </span>
             </div>
-            <p className="text-sm text-[#9db99d] mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {patient.age}y / {patient.gender} • Bed {patient.bed_id} • Admitted {patient.admission_date}
             </p>
           </div>
         </div>
 
         {/* Patient summary card */}
-        <div className="bg-[#1c271c] rounded-2xl border border-[#3b543b]/40 shadow-lg p-5">
+        <div className="bg-card rounded-2xl border border-border shadow-lg p-5">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {vitalItems.map(v => {
               const r = normalRange[v.key];
               const abnormal = isAbnormal(v.key, v.val ?? null);
               return (
-                <div key={v.key} className={`rounded-xl p-3 border ${abnormal ? 'bg-red-500/5 border-red-500/20' : 'bg-[#111f10] border-[#3b543b]/20'}`}>
+                <div key={v.key} className={`rounded-xl p-3 border ${abnormal ? 'bg-red-500/5 border-red-500/20' : 'bg-muted border-border'}`}>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`material-symbols-outlined text-sm ${abnormal ? 'text-red-400' : 'text-[#9db99d]'}`}>{v.icon}</span>
-                    <span className="text-[10px] text-[#9db99d] uppercase tracking-wider font-medium">{r.label}</span>
+                    <span className={`material-symbols-outlined text-sm ${abnormal ? 'text-red-400' : 'text-muted-foreground'}`}>{v.icon}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{r.label}</span>
                   </div>
-                  <p className={`text-xl font-bold ${abnormal ? 'text-red-400' : 'text-white'}`}>
+                  <p className={`text-xl font-bold ${abnormal ? 'text-red-400' : 'text-card-foreground'}`}>
                     {v.val ?? '—'}
-                    <span className="text-xs font-normal text-[#9db99d] ml-1">{r.unit}</span>
+                    <span className="text-xs font-normal text-muted-foreground ml-1">{r.unit}</span>
                   </p>
-                  <p className="text-[10px] text-[#9db99d]/60 mt-0.5">
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">
                     Normal: {r.min}–{r.max}
                   </p>
                 </div>
@@ -239,28 +239,28 @@ const PatientUpdate: React.FC = () => {
             })}
           </div>
           {/* Clinical summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-[#3b543b]/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
             <div>
-              <p className="text-xs text-[#9db99d] font-medium mb-1">Presenting Ailment</p>
-              <p className="text-white text-sm">{patient.presenting_ailment || '—'}</p>
+              <p className="text-xs text-muted-foreground font-medium mb-1">Presenting Ailment</p>
+              <p className="text-card-foreground text-sm">{patient.presenting_ailment || '—'}</p>
             </div>
             <div>
-              <p className="text-xs text-[#9db99d] font-medium mb-1">Medical History</p>
-              <p className="text-white text-sm">{patient.medical_history || '—'}</p>
+              <p className="text-xs text-muted-foreground font-medium mb-1">Medical History</p>
+              <p className="text-card-foreground text-sm">{patient.medical_history || '—'}</p>
             </div>
           </div>
         </div>
 
         {/* Success banner */}
         {saved && (
-          <div className="bg-[#13ec13]/10 border border-[#13ec13]/30 rounded-xl p-3 flex items-center gap-3 animate-fade-in">
-            <span className="material-symbols-outlined text-[#13ec13]">check_circle</span>
-            <p className="text-[#13ec13] text-sm font-medium">Changes saved successfully</p>
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-3 flex items-center gap-3 animate-fade-in">
+            <span className="material-symbols-outlined text-primary">check_circle</span>
+            <p className="text-primary text-sm font-medium">Changes saved successfully</p>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-[#1c271c] p-1 rounded-xl border border-[#3b543b]/40 w-fit">
+        <div className="flex gap-1 bg-card p-1 rounded-xl border border-border w-fit">
           {([
             { key: 'vitals', label: 'Update Vitals', icon: 'vital_signs' },
             { key: 'clinical', label: 'Clinical Info', icon: 'medical_information' },
@@ -269,8 +269,8 @@ const PatientUpdate: React.FC = () => {
             <button key={t.key} onClick={() => setActiveTab(t.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === t.key
-                  ? 'bg-[#13ec13]/10 text-[#13ec13] shadow-sm'
-                  : 'text-[#9db99d] hover:text-white'
+                  ? 'bg-primary/10 text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-card-foreground'
               }`}>
               <span className="material-symbols-outlined text-base">{t.icon}</span>
               {t.label}
@@ -280,9 +280,9 @@ const PatientUpdate: React.FC = () => {
 
         {/* Tab: Vitals */}
         {activeTab === 'vitals' && (
-          <form onSubmit={handleSaveVitals} className="bg-[#1c271c] p-6 rounded-2xl border border-[#3b543b]/40 shadow-lg">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#13ec13]">vital_signs</span>
+          <form onSubmit={handleSaveVitals} className="bg-card p-6 rounded-2xl border border-border shadow-lg">
+            <h2 className="text-lg font-semibold text-card-foreground mb-5 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">vital_signs</span>
               Vital Signs
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -293,27 +293,27 @@ const PatientUpdate: React.FC = () => {
                 { label: 'Resp Rate (/min)', value: rr, set: setRR, type: 'number' },
               ].map(f => (
                 <div key={f.label}>
-                  <label className="block text-sm font-medium text-[#9db99d] mb-2">{f.label}</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">{f.label}</label>
                   <input type={f.type} step={f.step} value={f.value} onChange={e => f.set(e.target.value)}
-                    className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-2.5 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all" />
+                    className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-2.5 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all" />
                 </div>
               ))}
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-[#9db99d] mb-2">Blood Pressure (mmHg)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Blood Pressure (mmHg)</label>
                 <div className="flex gap-3 items-center">
                   <input type="number" placeholder="Systolic" value={sys} onChange={e => setSys(e.target.value)}
-                    className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-2.5 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all" />
-                  <span className="text-[#9db99d] text-lg font-bold">/</span>
+                    className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-2.5 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all" />
+                  <span className="text-muted-foreground text-lg font-bold">/</span>
                   <input type="number" placeholder="Diastolic" value={dia} onChange={e => setDia(e.target.value)}
-                    className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-2.5 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all" />
+                    className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-2.5 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all" />
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#3b543b]/30">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
               <button type="button" onClick={() => navigate('/patients')}
-                className="px-5 py-2.5 rounded-xl border border-[#3b543b] text-[#9db99d] font-medium hover:bg-[#111811] transition-colors text-sm">Cancel</button>
+                className="px-5 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors text-sm">Cancel</button>
               <button type="submit" disabled={saving}
-                className="px-5 py-2.5 rounded-xl bg-[#13ec13] text-[#111811] font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
+                className="px-5 py-2.5 rounded-xl bg-primary text-green-950 font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
                 {saving ? 'Saving…' : 'Save Vitals'}
               </button>
             </div>
@@ -322,28 +322,28 @@ const PatientUpdate: React.FC = () => {
 
         {/* Tab: Clinical */}
         {activeTab === 'clinical' && (
-          <form onSubmit={handleSaveClinical} className="bg-[#1c271c] p-6 rounded-2xl border border-[#3b543b]/40 shadow-lg">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#13ec13]">medical_information</span>
+          <form onSubmit={handleSaveClinical} className="bg-card p-6 rounded-2xl border border-border shadow-lg">
+            <h2 className="text-lg font-semibold text-card-foreground mb-5 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">medical_information</span>
               Clinical Information
             </h2>
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-[#9db99d] mb-2">Clinical Notes & Observations</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Clinical Notes & Observations</label>
                 <textarea rows={5} value={clinicalNotes} onChange={e => setClinicalNotes(e.target.value)}
-                  className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-3 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all resize-none" />
+                  className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-3 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#9db99d] mb-2">Lab Results</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Lab Results</label>
                 <textarea rows={4} value={labResults} onChange={e => setLabResults(e.target.value)}
-                  className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-3 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all resize-none" />
+                  className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-3 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all resize-none" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#3b543b]/30">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
               <button type="button" onClick={() => navigate('/patients')}
-                className="px-5 py-2.5 rounded-xl border border-[#3b543b] text-[#9db99d] font-medium hover:bg-[#111811] transition-colors text-sm">Cancel</button>
+                className="px-5 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors text-sm">Cancel</button>
               <button type="submit" disabled={saving}
-                className="px-5 py-2.5 rounded-xl bg-[#13ec13] text-[#111811] font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
+                className="px-5 py-2.5 rounded-xl bg-primary text-green-950 font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
                 {saving ? 'Saving…' : 'Save Clinical Info'}
               </button>
             </div>
@@ -352,21 +352,21 @@ const PatientUpdate: React.FC = () => {
 
         {/* Tab: Add Note */}
         {activeTab === 'note' && (
-          <form onSubmit={handleAddNote} className="bg-[#1c271c] p-6 rounded-2xl border border-[#3b543b]/40 shadow-lg">
-            <h2 className="text-lg font-semibold text-white mb-5 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#13ec13]">note_add</span>
+          <form onSubmit={handleAddNote} className="bg-card p-6 rounded-2xl border border-border shadow-lg">
+            <h2 className="text-lg font-semibold text-card-foreground mb-5 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">note_add</span>
               Add Clinical Note
             </h2>
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-[#9db99d] mb-2">Note Type</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Note Type</label>
                 <div className="flex gap-2 flex-wrap">
                   {(['progress', 'observation', 'prescription', 'discharge-summary'] as const).map(t => (
                     <button key={t} type="button" onClick={() => setNoteType(t)}
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all capitalize ${
                         noteType === t
-                          ? 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/30'
-                          : 'bg-[#111811] text-[#9db99d] border-[#3b543b]/40 hover:text-white'
+                          ? 'bg-primary/10 text-primary border-primary/30'
+                          : 'bg-muted text-muted-foreground border-border hover:text-card-foreground'
                       }`}>
                       {t.replace('-', ' ')}
                     </button>
@@ -374,17 +374,17 @@ const PatientUpdate: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#9db99d] mb-2">Note Content</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Note Content</label>
                 <textarea rows={5} value={noteText} onChange={e => setNoteText(e.target.value)}
                   placeholder="Write your clinical note here…"
-                  className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-3 text-white placeholder:text-[#9db99d]/40 focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all resize-none" />
+                  className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-3 text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all resize-none" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#3b543b]/30">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
               <button type="button" onClick={() => setNoteText('')}
-                className="px-5 py-2.5 rounded-xl border border-[#3b543b] text-[#9db99d] font-medium hover:bg-[#111811] transition-colors text-sm">Clear</button>
+                className="px-5 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors text-sm">Clear</button>
               <button type="submit" disabled={saving || !noteText.trim()}
-                className="px-5 py-2.5 rounded-xl bg-[#13ec13] text-[#111811] font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
+                className="px-5 py-2.5 rounded-xl bg-primary text-green-950 font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
                 {saving ? 'Saving…' : 'Save Note'}
               </button>
             </div>

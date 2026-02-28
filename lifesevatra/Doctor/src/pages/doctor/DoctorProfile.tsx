@@ -95,7 +95,7 @@ const DoctorProfile: React.FC = () => {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="h-8 w-8 border-2 border-[#13ec13] border-t-transparent rounded-full animate-spin" />
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </DashboardLayout>
     );
@@ -109,12 +109,12 @@ const DoctorProfile: React.FC = () => {
         {/* Header */}
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">My Profile</h1>
-            <p className="text-sm text-[#9db99d] mt-1">View and manage your professional details</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-card-foreground tracking-tight">My Profile</h1>
+            <p className="text-sm text-muted-foreground mt-1">View and manage your professional details</p>
           </div>
           {!editing && (
             <button onClick={() => setEditing(true)}
-              className="flex items-center gap-2 rounded-xl bg-[#1c271c] border border-[#3b543b] px-4 py-2.5 text-sm font-medium text-white hover:border-[#13ec13] hover:text-[#13ec13] transition-all">
+              className="flex items-center gap-2 rounded-xl bg-card border border-border px-4 py-2.5 text-sm font-medium text-card-foreground hover:border-primary hover:text-primary transition-all">
               <span className="material-symbols-outlined text-lg">edit</span>
               Edit Profile
             </button>
@@ -123,28 +123,28 @@ const DoctorProfile: React.FC = () => {
 
         {/* Success */}
         {saved && (
-          <div className="bg-[#13ec13]/10 border border-[#13ec13]/30 rounded-xl p-3 flex items-center gap-3">
-            <span className="material-symbols-outlined text-[#13ec13]">check_circle</span>
-            <p className="text-[#13ec13] text-sm font-medium">Profile updated successfully</p>
+          <div className="bg-primary/10 border border-primary/30 rounded-xl p-3 flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary">check_circle</span>
+            <p className="text-primary text-sm font-medium">Profile updated successfully</p>
           </div>
         )}
 
         {/* Profile card */}
-        <div className="bg-[#1c271c] rounded-2xl border border-[#3b543b]/40 shadow-lg overflow-hidden">
+        <div className="bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
           {/* Banner + avatar */}
-          <div className="relative h-32 bg-gradient-to-r from-[#13ec13]/10 via-[#111f10] to-[#1c271c]">
+          <div className="relative h-32 bg-gradient-to-r from-primary/10 via-muted to-card">
             <div className="absolute -bottom-10 left-6">
-              <div className="h-20 w-20 rounded-2xl bg-[#13ec13]/10 border-[3px] border-[#1c271c] flex items-center justify-center text-[#13ec13] text-3xl font-bold shadow-lg">
+              <div className="h-20 w-20 rounded-2xl bg-primary/10 border-[3px] border-card flex items-center justify-center text-primary text-3xl font-bold shadow-lg">
                 {initials}
               </div>
             </div>
             <div className="absolute bottom-3 right-6">
               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border ${
                 profile.on_duty
-                  ? 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/30'
-                  : 'bg-[#9db99d]/10 text-[#9db99d] border-[#3b543b]'
+                  ? 'bg-primary/10 text-primary border-primary/30'
+                  : 'bg-muted text-muted-foreground border-border'
               }`}>
-                <span className={`h-2 w-2 rounded-full ${profile.on_duty ? 'bg-[#13ec13] animate-pulse' : 'bg-[#9db99d]/40'}`} />
+                <span className={`h-2 w-2 rounded-full ${profile.on_duty ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
                 {profile.on_duty ? 'On Duty' : 'Off Duty'}
               </span>
             </div>
@@ -166,22 +166,22 @@ const DoctorProfile: React.FC = () => {
                     { label: 'Languages (comma-separated)', key: 'languages', type: 'text' },
                   ].map(f => (
                     <div key={f.key}>
-                      <label className="block text-sm font-medium text-[#9db99d] mb-2">{f.label}</label>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">{f.label}</label>
                       <input
                         type={f.type}
                         value={form[f.key as keyof typeof form]}
                         onChange={e => setForm({ ...form, [f.key]: f.type === 'number' ? Number(e.target.value) : e.target.value })}
-                        className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-2.5 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all text-sm"
+                        className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-2.5 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all text-sm"
                         required
                       />
                     </div>
                   ))}
                   <div>
-                    <label className="block text-sm font-medium text-[#9db99d] mb-2">Shift</label>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Shift</label>
                     <select
                       value={form.shift}
                       onChange={e => setForm({ ...form, shift: e.target.value as 'day' | 'night' | 'rotating' })}
-                      className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-2.5 text-white focus:border-[#13ec13] outline-none transition-all text-sm">
+                      className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-2.5 text-[var(--input-text)] focus:border-primary outline-none transition-all text-sm">
                       <option value="day">Day</option>
                       <option value="night">Night</option>
                       <option value="rotating">Rotating</option>
@@ -189,15 +189,15 @@ const DoctorProfile: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#9db99d] mb-2">Bio / About</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Bio / About</label>
                   <textarea rows={3} value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })}
-                    className="w-full rounded-xl border border-[#3b543b]/50 bg-[#111811] px-4 py-3 text-white focus:border-[#13ec13] focus:ring-1 focus:ring-[#13ec13]/20 outline-none transition-all text-sm resize-none" />
+                    className="w-full rounded-xl border border-border bg-[var(--input-bg)] px-4 py-3 text-[var(--input-text)] focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all text-sm resize-none" />
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-[#3b543b]/30">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border">
                   <button type="button" onClick={handleCancel}
-                    className="px-5 py-2.5 rounded-xl border border-[#3b543b] text-[#9db99d] font-medium hover:bg-[#111811] transition-colors text-sm">Cancel</button>
+                    className="px-5 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors text-sm">Cancel</button>
                   <button type="submit" disabled={saving}
-                    className="px-5 py-2.5 rounded-xl bg-[#13ec13] text-[#111811] font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
+                    className="px-5 py-2.5 rounded-xl bg-primary text-green-950 font-bold shadow-[0_0_15px_rgba(19,236,19,0.3)] hover:shadow-[0_0_25px_rgba(19,236,19,0.5)] hover:scale-[1.02] transition-all text-sm disabled:opacity-50">
                     {saving ? 'Saving…' : 'Save Profile'}
                   </button>
                 </div>
@@ -207,15 +207,15 @@ const DoctorProfile: React.FC = () => {
               <div className="space-y-6">
                 {/* Name + specialty */}
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{profile.full_name}</h2>
-                  <p className="text-[#13ec13] font-medium mt-0.5">{profile.specialty}</p>
+                  <h2 className="text-2xl font-bold text-card-foreground">{profile.full_name}</h2>
+                  <p className="text-primary font-medium mt-0.5">{profile.specialty}</p>
                 </div>
                 {/* Bio */}
                 {profile.bio && (
-                  <p className="text-[#9db99d] text-sm leading-relaxed">{profile.bio}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{profile.bio}</p>
                 )}
                 {/* Detail grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-4 border-t border-[#3b543b]/30">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-4 border-t border-border">
                   {[
                     { icon: 'school', label: 'Qualifications', value: profile.qualification },
                     { icon: 'work_history', label: 'Experience', value: `${profile.experience_years} Years` },
@@ -228,23 +228,23 @@ const DoctorProfile: React.FC = () => {
                     { icon: 'calendar_today', label: 'Joined', value: new Date(profile.joined_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) },
                   ].map(item => (
                     <div key={item.label} className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#9db99d] text-lg mt-0.5">{item.icon}</span>
+                      <span className="material-symbols-outlined text-muted-foreground text-lg mt-0.5">{item.icon}</span>
                       <div>
-                        <p className="text-[11px] text-[#9db99d] uppercase tracking-wider font-medium">{item.label}</p>
-                        <p className="text-white font-medium text-sm">{item.value}</p>
+                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{item.label}</p>
+                        <p className="text-card-foreground font-medium text-sm">{item.value}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 {/* Languages */}
-                <div className="pt-4 border-t border-[#3b543b]/30">
-                  <p className="text-xs text-[#9db99d] font-medium mb-2 flex items-center gap-1">
+                <div className="pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground font-medium mb-2 flex items-center gap-1">
                     <span className="material-symbols-outlined text-sm">translate</span>
                     Languages
                   </p>
                   <div className="flex gap-2 flex-wrap">
                     {profile.languages.map(lang => (
-                      <span key={lang} className="px-3 py-1 rounded-full bg-[#233523] text-white text-xs font-medium border border-[#3b543b]/40">
+                      <span key={lang} className="px-3 py-1 rounded-full bg-muted text-card-foreground text-xs font-medium border border-border">
                         {lang}
                       </span>
                     ))}

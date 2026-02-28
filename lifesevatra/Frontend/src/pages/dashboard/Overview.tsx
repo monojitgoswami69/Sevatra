@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Patient } from '../../types';
 import { HOSPITAL_INFO } from '../../data/sampleData';
@@ -9,6 +9,7 @@ import StatsCards from '../../components/dashboard/StatsCards';
 import BedStatus from '../../components/dashboard/BedStatus';
 import PatientTable from '../../components/dashboard/PatientTable';
 import PatientDetailModal from '../../components/dashboard/PatientDetailModal';
+import { useNavbar } from '../../context/NavbarContext';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -116,47 +117,46 @@ const Dashboard: React.FC = () => {
     fetchAdmittedPatients();
   };
 
+  // Inject title and actions into the top navbar
+  const { setNavTitle, setNavActions } = useNavbar();
+  const refreshRef = useRef(refreshAll);
+  refreshRef.current = refreshAll;
+
+  useEffect(() => {
+    setNavTitle(
+      <span className="text-lg font-bold tracking-tight">Hospital Overview</span>
+    );
+    setNavActions(
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => refreshRef.current()}
+          className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:border-primary hover:bg-primary/5 hover:text-gray-900 dark:hover:text-white transition-all"
+        >
+          <span className="material-symbols-outlined text-base">refresh</span>
+          Refresh
+        </button>
+        <button
+          onClick={() => navigate('/newadmission')}
+          className="flex items-center gap-2 rounded-full bg-primary px-5 py-1.5 text-sm font-bold text-green-950 hover:bg-primary/90 shadow-md shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
+        >
+          <span className="material-symbols-outlined text-base">add_circle</span>
+          New Admission
+        </button>
+      </div>
+    );
+    return () => { setNavTitle(null); setNavActions(null); };
+  }, [navigate]);
+
   return (
     <DashboardLayout>
       <div className="relative z-10 p-8">
-        {/* Header */}
-        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Hospital Overview</h1>
-            <p className="text-sm text-[#9db99d] mt-1">
-              Real-time bed allocation and patient status monitoring.
-              {isLoading && (
-                <span className="ml-2 text-[#13ec13]">
-                  <span className="animate-pulse">● Refreshing...</span>
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={refreshAll}
-              className="flex items-center gap-2 rounded-full bg-[#1c271c] border border-[#3b543b] px-4 py-2 text-sm font-medium text-[#9db99d] hover:text-white hover:border-[#13ec13] hover:bg-[#13ec13]/5 transition-all"
-              title="Refresh patient data"
-            >
-              <span className="material-symbols-outlined text-lg">refresh</span>
-              Refresh
-            </button>
-            <button
-              onClick={() => navigate('/newadmission')}
-              className="flex items-center gap-2 rounded-full bg-[#13ec13] px-6 py-3 text-sm font-bold text-[#111811] hover:bg-[#3bf03b] shadow-[0_0_20px_rgba(19,236,19,0.4)] hover:shadow-[0_0_30px_rgba(19,236,19,0.6)] hover:scale-105 transition-all duration-300"
-            >
-              <span className="material-symbols-outlined text-xl">add_circle</span>
-              New Admission
-            </button>
-          </div>
-        </header>
 
         {/* Error Banner */}
         {error && (
           <div className="mb-6 rounded-xl border border-yellow-500/50 bg-yellow-500/10 p-4 flex items-center gap-3">
-            <span className="material-symbols-outlined text-yellow-400">warning</span>
-            <p className="text-sm text-yellow-300">{error}</p>
-            <button onClick={() => setError(null)} className="ml-auto text-yellow-400 hover:text-yellow-300">
+            <span className="material-symbols-outlined text-yellow-500">warning</span>
+            <p className="text-sm text-yellow-600 dark:text-yellow-400">{error}</p>
+            <button onClick={() => setError(null)} className="ml-auto text-yellow-500 hover:text-yellow-600 dark:hover:text-yellow-300">
               <span className="material-symbols-outlined">close</span>
             </button>
           </div>

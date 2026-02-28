@@ -18,14 +18,14 @@ const typeColor: Record<string, string> = {
   consultation: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   'follow-up': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   procedure: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  rounds: 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/20',
-  break: 'bg-[#9db99d]/10 text-[#9db99d] border-[#3b543b]/40',
+  rounds: 'bg-primary/10 text-primary border-primary/20',
+  break: 'bg-muted text-muted-foreground border-border',
 };
 
 const statusBadge: Record<string, { cls: string; label: string; icon: string }> = {
   completed: { cls: 'bg-green-500/10 text-green-400 border-green-500/20', label: 'Done', icon: 'check_circle' },
-  'in-progress': { cls: 'bg-[#13ec13]/10 text-[#13ec13] border-[#13ec13]/20', label: 'In Progress', icon: 'pending' },
-  scheduled: { cls: 'bg-[#233523] text-[#9db99d] border-[#3b543b]/40', label: 'Upcoming', icon: 'schedule' },
+  'in-progress': { cls: 'bg-primary/10 text-primary border-primary/20', label: 'In Progress', icon: 'pending' },
+  scheduled: { cls: 'bg-muted text-muted-foreground border-border', label: 'Upcoming', icon: 'schedule' },
   cancelled: { cls: 'bg-red-500/10 text-red-400 border-red-500/20', label: 'Cancelled', icon: 'cancel' },
   'no-show': { cls: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20', label: 'No Show', icon: 'person_off' },
 };
@@ -58,26 +58,26 @@ const Schedule: React.FC = () => {
       <div className="relative z-10 p-6 lg:p-8 space-y-6">
         {/* Header */}
         <header>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Today's Schedule</h1>
-          <p className="text-sm text-[#9db99d] mt-1">
+          <h1 className="text-2xl lg:text-3xl font-bold text-card-foreground tracking-tight">Today's Schedule</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             &nbsp;•&nbsp;{completed}/{slots.length} completed
           </p>
         </header>
 
         {/* Progress bar */}
-        <div className="bg-[#1c271c] rounded-2xl border border-[#3b543b]/40 p-5 shadow-lg">
+        <div className="bg-card rounded-2xl border border-border p-5 shadow-lg">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-white font-semibold text-sm">Day Progress</p>
-            <p className="text-[#13ec13] text-sm font-bold">{Math.round((completed / Math.max(slots.length, 1)) * 100)}%</p>
+            <p className="text-card-foreground font-semibold text-sm">Day Progress</p>
+            <p className="text-primary text-sm font-bold">{Math.round((completed / Math.max(slots.length, 1)) * 100)}%</p>
           </div>
-          <div className="h-2 bg-[#233523] rounded-full overflow-hidden">
-            <div className="h-full bg-[#13ec13] rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(19,236,19,0.4)]"
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(19,236,19,0.4)]"
               style={{ width: `${(completed / Math.max(slots.length, 1)) * 100}%` }} />
           </div>
           {inProgress && (
-            <p className="text-[#9db99d] text-xs mt-3 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#13ec13] animate-pulse" />
+            <p className="text-muted-foreground text-xs mt-3 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
               Currently: {inProgress.patient_name || inProgress.notes || inProgress.type} ({inProgress.time})
             </p>
           )}
@@ -97,25 +97,25 @@ const Schedule: React.FC = () => {
 
               return (
                 <div key={slot.id}
-                  className={`bg-[#1c271c] rounded-2xl border shadow-lg overflow-hidden transition-all ${
-                    isActive ? 'border-[#13ec13]/30 ring-1 ring-[#13ec13]/10' : 'border-[#3b543b]/40'
+                  className={`bg-card rounded-2xl border shadow-lg overflow-hidden transition-all ${
+                    isActive ? 'border-primary/30 ring-1 ring-primary/10' : 'border-border'
                   }`}>
                   <div className="flex items-stretch">
                     {/* Time column */}
-                    <div className={`w-24 flex-shrink-0 flex flex-col items-center justify-center p-4 border-r border-[#3b543b]/30 ${
-                      isActive ? 'bg-[#13ec13]/5' : slot.status === 'completed' ? 'bg-green-500/5' : ''
+                    <div className={`w-24 flex-shrink-0 flex flex-col items-center justify-center p-4 border-r border-border ${
+                      isActive ? 'bg-primary/5' : slot.status === 'completed' ? 'bg-green-500/5' : ''
                     }`}>
-                      <p className={`text-sm font-bold font-mono ${isActive ? 'text-[#13ec13]' : 'text-white'}`}>{slot.time}</p>
+                      <p className={`text-sm font-bold font-mono ${isActive ? 'text-primary' : 'text-card-foreground'}`}>{slot.time}</p>
                       {/* timeline dot */}
                       <div className="relative my-2">
                         <div className={`h-3 w-3 rounded-full ${
-                          isActive ? 'bg-[#13ec13] shadow-[0_0_8px_rgba(19,236,19,0.6)]' :
+                          isActive ? 'bg-primary shadow-[0_0_8px_rgba(19,236,19,0.6)]' :
                           slot.status === 'completed' ? 'bg-green-500' :
-                          'bg-[#3b543b]'
+                          'bg-muted-foreground'
                         }`} />
                         {idx < slots.length - 1 && (
                           <div className={`absolute top-4 left-1/2 -translate-x-1/2 w-0.5 h-4 ${
-                            slot.status === 'completed' ? 'bg-green-500/30' : 'bg-[#3b543b]/30'
+                            slot.status === 'completed' ? 'bg-green-500/30' : 'bg-border/50'
                           }`} />
                         )}
                       </div>
@@ -134,12 +134,12 @@ const Schedule: React.FC = () => {
                         {slot.patient_name ? (
                           <button
                             onClick={() => slot.patient_id && navigate(`/patients/${slot.patient_id}`)}
-                            className={`font-medium text-sm ${slot.patient_id ? 'text-white hover:text-[#13ec13] transition-colors cursor-pointer' : 'text-white'}`}>
+                            className={`font-medium text-sm ${slot.patient_id ? 'text-card-foreground hover:text-primary transition-colors cursor-pointer' : 'text-card-foreground'}`}>
                             {slot.patient_name}
                           </button>
                         ) : null}
                         {slot.notes && (
-                          <p className="text-[#9db99d] text-xs mt-0.5 truncate">{slot.notes}</p>
+                          <p className="text-muted-foreground text-xs mt-0.5 truncate">{slot.notes}</p>
                         )}
                       </div>
 
@@ -154,7 +154,7 @@ const Schedule: React.FC = () => {
                         <div className="flex gap-1">
                           {slot.status === 'scheduled' && (
                             <button onClick={() => handleStatusChange(slot.id, 'in-progress')}
-                              className="p-1.5 rounded-lg bg-[#13ec13]/10 text-[#13ec13] hover:bg-[#13ec13]/20 transition-colors border border-[#13ec13]/20"
+                              className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-primary/20"
                               title="Start">
                               <span className="material-symbols-outlined text-sm">play_arrow</span>
                             </button>
