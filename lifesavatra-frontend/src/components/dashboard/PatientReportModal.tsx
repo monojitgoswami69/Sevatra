@@ -66,8 +66,8 @@ const PatientReportModal: React.FC<PatientReportModalProps> = ({ patient, onClos
     const fetchPatient = async () => {
       try {
         setIsLoading(true);
-        const numericId = parseInt(patient.id.replace(/\D/g, ''));
-        const response = await getPatientById(numericId);
+        const rawId = patient.id.replace(/^P-/, '');
+        const response = await getPatientById(rawId);
         if (response.success) {
           setFullPatient(response.data);
         } else {

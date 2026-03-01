@@ -7,6 +7,26 @@ export interface Patient {
   severityScore: number;
   condition: 'Critical' | 'Serious' | 'Stable' | 'Recovering';
   doctor: string;
+  // Extended fields from backend
+  age?: number;
+  gender?: string;
+  bloodGroup?: string;
+  emergencyContact?: string;
+  address?: string;
+  guardianName?: string;
+  guardianRelation?: string;
+  guardianPhone?: string;
+  guardianEmail?: string;
+  presentingAilment?: string;
+  medicalHistory?: string;
+  clinicalNotes?: string;
+  labResults?: string;
+  heartRate?: number;
+  spo2?: number;
+  respRate?: number;
+  temperature?: number;
+  bpSystolic?: number;
+  bpDiastolic?: number;
 }
 
 export interface BedStatus {
