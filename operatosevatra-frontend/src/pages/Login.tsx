@@ -2,10 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOperator } from '../context/OperatorContext';
-import { authApi, setTokens, operatorApi, type OperatorType } from '../services/api';
+import { authApi, setTokens, operatorApi, type OperatorType, type AmbulanceType } from '../services/api';
 
 type AuthAction = 'login' | 'signup';
 type Step = 'form' | 'verify-email' | 'operator-register' | 'complete';
+
+const commonEquipment = [
+    { key: 'has_oxygen', label: 'Oxygen Tank' },
+    { key: 'has_defibrillator', label: 'Defibrillator (AED)' },
+    { key: 'has_stretcher', label: 'Stretcher' },
+    { key: 'has_ventilator', label: 'Ventilator' },
+    { key: 'has_first_aid', label: 'First Aid Kit' },
+];
 
 const Login = () => {
     const [authAction, setAuthAction] = useState<AuthAction>('login');
@@ -24,6 +32,27 @@ const Login = () => {
         facilityAddress: '',
         facilityPhone: '',
         licenseNumber: '',
+    });
+
+    // Ambulance data for individual operators
+    const [ambulanceData, setAmbulanceData] = useState({
+        vehicle_number: '',
+        ambulance_type: 'basic' as AmbulanceType,
+        vehicle_make: '',
+        vehicle_model: '',
+        vehicle_year: new Date().getFullYear(),
+        has_oxygen: false,
+        has_defibrillator: false,
+        has_stretcher: true,
+        has_ventilator: false,
+        has_first_aid: true,
+        driver_name: '',
+        driver_phone: '',
+        driver_license_number: '',
+        driver_experience_years: '' as string | number,
+        base_address: '',
+        service_radius_km: '',
+        price_per_km: '',
     });
 
     const [emailCode, setEmailCode] = useState('');
@@ -52,6 +81,15 @@ const Login = () => {
     const handleOperatorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setOperatorData(prev => ({ ...prev, [e.target.name]: e.target.value }));
         setError('');
+    };
+
+    const handleAmbulanceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setAmbulanceData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setError('');
+    };
+
+    const toggleEquipment = (key: string) => {
+        setAmbulanceData(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
     };
 
     // ── Login / Signup submit ──
@@ -137,6 +175,7 @@ const Login = () => {
         setError('');
         setIsLoading(true);
         try {
+            // 1. Register operator
             await operatorApi.register({
                 operator_type: operatorData.operatorType,
                 full_name: formData.fullName || 'Operator',
@@ -147,6 +186,35 @@ const Login = () => {
                 license_number: operatorData.licenseNumber || undefined,
             });
             setIsOperator(true);
+
+            // 2. If individual, also create the single ambulance
+            if (operatorData.operatorType === 'individual') {
+                try {
+                    await operatorApi.createAmbulance({
+                        vehicle_number: ambulanceData.vehicle_number,
+                        ambulance_type: ambulanceData.ambulance_type,
+                        vehicle_make: ambulanceData.vehicle_make || undefined,
+                        vehicle_model: ambulanceData.vehicle_model || undefined,
+                        vehicle_year: ambulanceData.vehicle_year,
+                        has_oxygen: ambulanceData.has_oxygen,
+                        has_defibrillator: ambulanceData.has_defibrillator,
+                        has_stretcher: ambulanceData.has_stretcher,
+                        has_ventilator: ambulanceData.has_ventilator,
+                        has_first_aid: ambulanceData.has_first_aid,
+                        driver_name: ambulanceData.driver_name,
+                        driver_phone: ambulanceData.driver_phone,
+                        driver_license_number: ambulanceData.driver_license_number,
+                        driver_experience_years: ambulanceData.driver_experience_years ? Number(ambulanceData.driver_experience_years) : undefined,
+                        base_address: ambulanceData.base_address || undefined,
+                        service_radius_km: ambulanceData.service_radius_km ? parseFloat(String(ambulanceData.service_radius_km)) : undefined,
+                        price_per_km: ambulanceData.price_per_km ? parseFloat(String(ambulanceData.price_per_km)) : undefined,
+                    });
+                } catch (ambErr) {
+                    console.error('Failed to create ambulance during registration:', ambErr);
+                    // Don't block registration if ambulance creation fails
+                }
+            }
+
             setStep('complete');
             setTimeout(() => navigate('/dashboard'), 2000);
         } catch (err) {
@@ -456,6 +524,7 @@ const Login = () => {
                                         </div>
                                     </div>
 
+                                    {/* Provider fields */}
                                     <AnimatePresence>
                                         {operatorData.operatorType === 'provider' && (
                                             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
@@ -477,6 +546,130 @@ const Login = () => {
                                                     <div>
                                                         <label className={labelBase}>Facility Phone</label>
                                                         <input name="facilityPhone" type="tel" value={operatorData.facilityPhone} onChange={handleOperatorChange} className={inputClean} placeholder="+261 20 00 000 00" />
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* ═══ INDIVIDUAL — Ambulance Details (inline) ═══ */}
+                                    <AnimatePresence>
+                                        {operatorData.operatorType === 'individual' && (
+                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                                <div className="space-y-5 p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/30 mb-2">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg">local_shipping</span>
+                                                        <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Your Ambulance</span>
+                                                    </div>
+                                                    <p className="text-xs text-text-gray dark:text-gray-500 -mt-2">
+                                                        As an individual operator, you can register one ambulance. This will be set up now.
+                                                    </p>
+
+                                                    {/* Vehicle */}
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className={labelBase}>Vehicle Number *</label>
+                                                            <input name="vehicle_number" value={ambulanceData.vehicle_number} onChange={handleAmbulanceChange}
+                                                                required className={inputClean} placeholder="e.g. 1234 TAA" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Type *</label>
+                                                            <select name="ambulance_type" value={ambulanceData.ambulance_type} onChange={handleAmbulanceChange}
+                                                                className={inputClean + " cursor-pointer"}>
+                                                                <option value="basic">BLS — Basic</option>
+                                                                <option value="advanced">ALS — Advanced</option>
+                                                                <option value="patient_transport">Patient Transport</option>
+                                                                <option value="neonatal">Neonatal</option>
+                                                                <option value="air">Air Ambulance</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-3">
+                                                        <div>
+                                                            <label className={labelBase}>Make</label>
+                                                            <input name="vehicle_make" value={ambulanceData.vehicle_make} onChange={handleAmbulanceChange}
+                                                                className={inputClean} placeholder="Toyota" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Model</label>
+                                                            <input name="vehicle_model" value={ambulanceData.vehicle_model} onChange={handleAmbulanceChange}
+                                                                className={inputClean} placeholder="HiAce" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Year</label>
+                                                            <input name="vehicle_year" type="number" min="1990" max="2030" value={ambulanceData.vehicle_year} onChange={handleAmbulanceChange}
+                                                                className={inputClean} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Equipment */}
+                                                    <div>
+                                                        <label className={labelBase}>Equipment</label>
+                                                        <div className="flex flex-wrap gap-1.5 mt-1">
+                                                            {commonEquipment.map(item => {
+                                                                const selected = ambulanceData[item.key as keyof typeof ambulanceData] as boolean;
+                                                                return (
+                                                                    <button key={item.key} type="button" onClick={() => toggleEquipment(item.key)}
+                                                                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border ${
+                                                                            selected
+                                                                                ? 'bg-emerald-500 text-white border-emerald-500'
+                                                                                : 'bg-white dark:bg-gray-800 text-text-gray dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                                                                        }`}>
+                                                                        {selected && <span className="mr-0.5">✓</span>}
+                                                                        {item.label}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Driver */}
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-lg">person</span>
+                                                        <span className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Driver Info</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className={labelBase}>Driver Name *</label>
+                                                            <input name="driver_name" value={ambulanceData.driver_name} onChange={handleAmbulanceChange}
+                                                                required className={inputClean} placeholder="Full name" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Driver Phone *</label>
+                                                            <input name="driver_phone" type="tel" value={ambulanceData.driver_phone} onChange={handleAmbulanceChange}
+                                                                required className={inputClean} placeholder="+261 34..." />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className={labelBase}>License # *</label>
+                                                            <input name="driver_license_number" value={ambulanceData.driver_license_number} onChange={handleAmbulanceChange}
+                                                                required className={inputClean} placeholder="License number" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Experience (yrs)</label>
+                                                            <input name="driver_experience_years" type="number" min="0" max="50" value={ambulanceData.driver_experience_years}
+                                                                onChange={handleAmbulanceChange} className={inputClean} placeholder="e.g. 5" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Location */}
+                                                    <div>
+                                                        <label className={labelBase}>Base Address</label>
+                                                        <input name="base_address" value={ambulanceData.base_address} onChange={handleAmbulanceChange}
+                                                            className={inputClean} placeholder="Where ambulance is stationed" />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className={labelBase}>Service Radius (km)</label>
+                                                            <input name="service_radius_km" type="number" step="0.1" min="1" max="500" value={ambulanceData.service_radius_km}
+                                                                onChange={handleAmbulanceChange} className={inputClean} placeholder="e.g. 50" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelBase}>Price / KM (Ar)</label>
+                                                            <input name="price_per_km" type="number" step="0.01" min="0" value={ambulanceData.price_per_km}
+                                                                onChange={handleAmbulanceChange} className={inputClean} placeholder="e.g. 5000" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </motion.div>

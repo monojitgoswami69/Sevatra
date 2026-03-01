@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Ambulances from './pages/Ambulances';
 import AddAmbulance from './pages/AddAmbulance';
 import OperatorProfile from './pages/OperatorProfile';
+import ProviderOnly from './components/ProviderOnly';
 
 const App = () => {
     return (
@@ -20,8 +21,8 @@ const App = () => {
                     {/* Authenticated + Operator */}
                     <Route element={<Layout requireAuth requireOperator />}>
                         <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/ambulances" element={<Ambulances />} />
-                        <Route path="/ambulances/add" element={<AddAmbulance />} />
+                        <Route path="/ambulances" element={<ProviderOnly><Ambulances /></ProviderOnly>} />
+                        <Route path="/ambulances/add" element={<ProviderOnly><AddAmbulance /></ProviderOnly>} />
                         <Route path="/profile" element={<OperatorProfile />} />
                     </Route>
 

@@ -3,9 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOperator } from '../context/OperatorContext';
 
-const navLinks = [
+const providerNavLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
     { to: '/ambulances', label: 'Ambulances', icon: 'local_shipping' },
+    { to: '/profile', label: 'Profile', icon: 'person' },
+];
+
+const individualNavLinks = [
+    { to: '/dashboard', label: 'Dashboard', icon: 'space_dashboard' },
     { to: '/profile', label: 'Profile', icon: 'person' },
 ];
 
@@ -14,6 +19,8 @@ const Header = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { isLoggedIn, profile, logout } = useOperator();
+
+    const navLinks = profile?.operatorType === 'individual' ? individualNavLinks : providerNavLinks;
 
     const handleLogout = () => {
         logout();

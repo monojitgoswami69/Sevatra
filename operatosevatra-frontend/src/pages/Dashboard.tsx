@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { operatorApi, type AmbulanceData, type DashboardStats } from '../services/api';
 import { useOperator } from '../context/OperatorContext';
+import IndividualDashboard from './IndividualDashboard';
 
 const statusColors: Record<string, string> = {
     available: 'bg-success-green/10 text-success-green border-success-green/20',
@@ -20,6 +21,11 @@ const Dashboard = () => {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [ambulances, setAmbulances] = useState<AmbulanceData[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Individual operators get a completely different dashboard
+    if (profile?.operatorType === 'individual') {
+        return <IndividualDashboard />;
+    }
 
     useEffect(() => {
         const load = async () => {
