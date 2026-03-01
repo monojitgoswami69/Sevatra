@@ -2,17 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import { UserProvider } from './context/UserContext';
 
-import Chatbot from './components/Chatbot';
+import Footer from './components/Footer';
 import Home from './pages/Home';
-import About from './pages/About';
 import Login from './pages/Login';
 import SosActivation from './pages/SosActivation';
-import Features from './pages/Features';
-import HowItWorks from './pages/HowItWorks';
 import Profile from './pages/Profile';
 import BookingHistory from './pages/BookingHistory';
 import AmbulanceConfirmed from './pages/AmbulanceConfirmed';
-import Faq from './pages/Faq';
 import BookAmbulance from './pages/BookAmbulance';
 
 function App() {
@@ -26,21 +22,16 @@ function App() {
           <main className="relative z-10 flex flex-col flex-grow w-full items-center">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/book-ambulance" element={<BookAmbulance />} />
               <Route path="/sos-activation" element={<SosActivation />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/booking-history" element={<BookingHistory />} />
               <Route path="/ambulance-confirmed" element={<AmbulanceConfirmed />} />
-              <Route path="/faq" element={<Faq />} />
             </Routes>
           </main>
 
-
-          <Chatbot />
+          <Footer />
         </div>
       </Router>
     </UserProvider>

@@ -83,78 +83,111 @@ const BookingHistory = () => {
                     </Link>
                 </div>
             ) : (
-            <div className="space-y-6">
-                {history.map((booking) => (
-                    <div key={booking.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 shadow-md hover:shadow-xl transition-shadow relative">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 dark:border-gray-800 pb-5 mb-5 gap-4">
-                            <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 bg-primary-blue/10 text-primary-blue rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm">
-                                    <span className="material-symbols-outlined">local_hospital</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-lg text-text-dark dark:text-white flex items-center gap-2">
-                                        {booking.patient_name}
-                                        <span className={`text-xs px-2 py-0.5 rounded border ${getStatusColor(booking.status)}`}>
-                                            {booking.status.replace('_', ' ')}
+                <div className="space-y-6">
+                    {history.map((booking) => (
+                        <div key={booking.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 sm:p-8 shadow-md hover:shadow-xl transition-shadow relative">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 dark:border-gray-800 pb-5 mb-5 gap-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 bg-primary-blue/10 text-primary-blue rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm">
+                                        <span className="material-symbols-outlined">
+                                            {booking.booking_type === 'sos' ? 'emergency' : 'local_hospital'}
                                         </span>
-                                    </h3>
-                                    <p className="text-sm font-semibold text-text-gray">
-                                        {booking.scheduled_date} at {booking.scheduled_time} • {booking.id}
-                                    </p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-text-dark dark:text-white flex items-center gap-2">
+                                            {booking.patient_name}
+                                            {booking.booking_type === 'sos' && (
+                                                <span className="text-xs px-2 py-0.5 rounded border bg-emergency-red/20 text-emergency-red border-emergency-red/30">
+                                                    SOS
+                                                </span>
+                                            )}
+                                            <span className={`text-xs px-2 py-0.5 rounded border ${getStatusColor(booking.status)}`}>
+                                                {booking.status.replace('_', ' ')}
+                                            </span>
+                                        </h3>
+                                        <p className="text-sm font-semibold text-text-gray">
+                                            {booking.scheduled_date} at {booking.scheduled_time} • {booking.id}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="text-right flex items-center gap-3">
-                                {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                                    <button
-                                        onClick={() => handleCancel(booking.id)}
-                                        className="text-sm text-red-500 font-bold hover:underline"
+                                <div className="text-right flex items-center gap-3">
+                                    <Link
+                                        to="/ambulance-confirmed"
+                                        state={{ booking }}
+                                        className="px-4 py-2 bg-primary-blue/10 text-primary-blue hover:bg-primary-blue/20 rounded-lg font-bold text-sm transition-colors flex items-center gap-1"
                                     >
-                                        Cancel
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="relative pl-6">
-                                <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
-                                <div className="mb-6 relative">
-                                    <div className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-primary-blue ring-4 ring-primary-blue/20"></div>
-                                    <p className="text-xs font-bold text-text-gray mb-1 uppercase tracking-wider">Pick-up</p>
-                                    <p className="font-bold text-text-dark dark:text-gray-200">{booking.pickup_address}</p>
-                                </div>
-                                <div className="relative">
-                                    <div className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-success-green ring-4 ring-success-green/20"></div>
-                                    <p className="text-xs font-bold text-text-gray mb-1 uppercase tracking-wider">Destination</p>
-                                    <p className="font-bold text-text-dark dark:text-gray-200">{booking.destination}</p>
+                                        <span className="material-symbols-outlined text-sm">visibility</span>
+                                        View
+                                    </Link>
+                                    {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                                        <button
+                                            onClick={() => handleCancel(booking.id)}
+                                            className="text-sm text-red-500 font-bold hover:underline"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-800/50">
-                                <h4 className="text-sm font-bold text-text-gray mb-4 flex items-center gap-2">
-                                    <span className="material-symbols-outlined">info</span> Booking Details
-                                </h4>
-                                <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
-                                    <span className="font-semibold text-text-dark dark:text-gray-300">Patient Phone</span>
-                                    <span className="font-bold">{booking.patient_phone}</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="relative pl-6">
+                                    <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                                    <div className="mb-6 relative">
+                                        <div className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-primary-blue ring-4 ring-primary-blue/20"></div>
+                                        <p className="text-xs font-bold text-text-gray mb-1 uppercase tracking-wider">Pick-up</p>
+                                        <p className="font-bold text-text-dark dark:text-gray-200">{booking.pickup_address}</p>
+                                    </div>
+                                    <div className="relative">
+                                        <div className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-success-green ring-4 ring-success-green/20"></div>
+                                        <p className="text-xs font-bold text-text-gray mb-1 uppercase tracking-wider">Destination</p>
+                                        <p className="font-bold text-text-dark dark:text-gray-200">{booking.destination}</p>
+                                    </div>
                                 </div>
-                                {booking.reason && (
+
+                                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-800/50">
+                                    <h4 className="text-sm font-bold text-text-gray mb-4 flex items-center gap-2">
+                                        <span className="material-symbols-outlined">info</span> Booking Details
+                                    </h4>
+                                    {booking.assigned_ambulance && (
+                                        <>
+                                            <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                                <span className="font-semibold text-text-dark dark:text-gray-300">Ambulance</span>
+                                                <span className="font-bold font-mono">{booking.assigned_ambulance.vehicle_number}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                                <span className="font-semibold text-text-dark dark:text-gray-300">Driver</span>
+                                                <span className="font-bold">{booking.assigned_ambulance.driver_name}</span>
+                                            </div>
+                                            {booking.assigned_ambulance.distance_km != null && (
+                                                <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                                    <span className="font-semibold text-text-dark dark:text-gray-300">Distance</span>
+                                                    <span className="font-bold">{booking.assigned_ambulance.distance_km} km away</span>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                     <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
-                                        <span className="font-semibold text-text-dark dark:text-gray-300">Reason</span>
-                                        <span className="font-bold">{booking.reason}</span>
+                                        <span className="font-semibold text-text-dark dark:text-gray-300">Patient Phone</span>
+                                        <span className="font-bold">{booking.patient_phone}</span>
                                     </div>
-                                )}
-                                {booking.additional_notes && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold text-text-dark dark:text-gray-300">Notes</span>
-                                        <span className="font-bold text-sm">{booking.additional_notes}</span>
-                                    </div>
-                                )}
+                                    {booking.reason && (
+                                        <div className="flex justify-between items-center mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">
+                                            <span className="font-semibold text-text-dark dark:text-gray-300">Reason</span>
+                                            <span className="font-bold">{booking.reason}</span>
+                                        </div>
+                                    )}
+                                    {booking.additional_notes && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-text-dark dark:text-gray-300">Notes</span>
+                                            <span className="font-bold text-sm">{booking.additional_notes}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
             )}
         </div>
     );

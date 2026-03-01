@@ -71,7 +71,7 @@ const Home = () => {
                 >
 
 
-                    <h1 className="text-5xl sm:text-6xl md:text-8xl font-black leading-tight tracking-tighter text-text-dark dark:text-white px-2 font-display">
+                    <h1 className="text-5xl sm:text-6xl md:text-8xl font-black leading-tight tracking-tighter text-text-dark dark:text-white px-2 font-display" style={{ fontFamily: '"Google Sans Flex", sans-serif' }}>
                         Immediate Help, <br className="hidden sm:block" />
                         <span className="bg-gradient-to-r from-primary-blue via-blue-500 to-accent-purple bg-clip-text text-transparent inline-block pb-2">
                             Just a Tap Away.
@@ -132,77 +132,7 @@ const Home = () => {
                     </Link>
                 </motion.div>
 
-                {/* Features Grid */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.8 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 w-full max-w-6xl px-4 pt-10 pb-10"
-                >
-                    {[
-                        {
-                            icon: 'event_available',
-                            title: 'Schedule Transport',
-                            desc: 'Pre-book reliable, comfortable medical transport for hospital checkups or discharges.',
-                            colorFrom: 'from-primary-blue',
-                            colorTo: 'to-accent-purple',
-                            hoverBorder: 'hover:border-primary-blue/50',
-                        },
-                        {
-                            icon: 'location_on',
-                            title: 'Live GPS Tracking',
-                            desc: 'Track ambulance location in real-time with accurate ETA and driver details.',
-                            colorFrom: 'from-success-green',
-                            colorTo: 'to-emerald-500',
-                            hoverBorder: 'hover:border-success-green/50',
-                        },
-                        {
-                            icon: 'speed',
-                            title: '5-Second Response',
-                            desc: 'Emergency SOS with ultra-fast countdown and instant dispatch to save precious seconds.',
-                            colorFrom: 'from-emergency-red',
-                            colorTo: 'to-rose-600',
-                            hoverBorder: 'hover:border-emergency-red/50',
-                        },
-                    ].map((feature, i) => (
-                        <motion.div
-                            whileHover={{ y: -8, scale: 1.02 }}
-                            key={i}
-                            className={`group relative overflow-hidden bg-gradient-to-br from-white/95 to-gray-50/95 dark:from-gray-900/95 dark:to-gray-800/95 backdrop-blur-xl p-7 sm:p-8 rounded-2xl sm:rounded-3xl border-2 border-gray-200/50 dark:border-gray-800/50 shadow-xl hover:shadow-2xl transition-all duration-300 ${feature.hoverBorder}`}
-                        >
-                            <div
-                                className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.colorFrom}/20 to-transparent rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}
-                            ></div>
-                            <div className="relative z-10">
-                                <div
-                                    className={`w-14 h-14 sm:w-16 sm:h-16 mb-5 bg-gradient-to-br ${feature.colorFrom} ${feature.colorTo} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                                >
-                                    <span className="material-symbols-outlined text-white text-3xl sm:text-4xl font-bold">
-                                        {feature.icon}
-                                    </span>
-                                </div>
-                                <h3 className="text-xl sm:text-2xl font-black text-text-dark dark:text-white mb-3 font-display tracking-tight">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-sm sm:text-base text-text-gray dark:text-gray-400 leading-relaxed font-medium">
-                                    {feature.desc}
-                                </p>
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
 
-                {/* See All Features Button */}
-                <div className="mt-8 pb-10">
-                    <Link
-                        to="/features"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 text-primary-blue border-2 border-primary-blue rounded-xl font-bold hover:bg-primary-blue hover:text-white transition-all"
-                    >
-                        <span className="material-symbols-outlined">auto_awesome</span>
-                        View All Features
-                    </Link>
-                </div>
             </div>
         </>
     );

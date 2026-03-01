@@ -172,6 +172,29 @@ export const usersApi = {
     deleteMedicalCondition: (id: string) => request('/users/me/medical-conditions/' + id, { method: 'DELETE' }),
 };
 
+// ── Assigned Ambulance ──
+
+export interface AssignedAmbulance {
+    ambulance_id: string;
+    vehicle_number: string;
+    ambulance_type: string;
+    driver_name: string;
+    driver_phone: string;
+    driver_photo_url: string | null;
+    vehicle_make: string | null;
+    vehicle_model: string | null;
+    vehicle_year: number | null;
+    has_oxygen: boolean;
+    has_defibrillator: boolean;
+    has_stretcher: boolean;
+    has_ventilator: boolean;
+    base_latitude: number | null;
+    base_longitude: number | null;
+    base_address: string | null;
+    distance_km: number | null;
+    operator_id: string | null;
+}
+
 // ── Bookings API ──
 
 export interface BookingData {
@@ -189,6 +212,9 @@ export interface BookingData {
     special_needs: Record<string, boolean> | null;
     additional_notes: string | null;
     status: string;
+    assigned_ambulance: AssignedAmbulance | null;
+    booking_type: string | null;
+    sos_id: string | null;
     created_at: string | null;
 }
 
@@ -205,6 +231,8 @@ export const bookingsApi = {
         reason?: string;
         special_needs?: Record<string, boolean>;
         additional_notes?: string;
+        latitude?: number;
+        longitude?: number;
     }) => request<BookingData>('/bookings/', { method: 'POST', body: JSON.stringify(data) }),
 
     list: (limit = 20, offset = 0) =>
@@ -225,12 +253,13 @@ export interface SosData {
     longitude: number | null;
     address: string | null;
     verified_phone: string | null;
+    assigned_ambulance: AssignedAmbulance | null;
     created_at: string | null;
 }
 
 export const sosApi = {
     activate: (data: { latitude?: number; longitude?: number; address?: string }) =>
-        request<SosData>('/sos/activate', { method: 'POST', body: JSON.stringify(data) }, false),
+        request<SosData>('/sos/activate', { method: 'POST', body: JSON.stringify(data) }),
 
     sendOtp: (sosId: string, phone: string) =>
         request<{ success: boolean; message: string }>(
@@ -248,3 +277,44 @@ export const sosApi = {
         request<SosData>(`/sos/${sosId}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }, false),
 };
 
+// ── Tracking API ──
+
+const WS_BASE = API_BASE.replace(/^http/, 'ws');
+
+export interface TrackingData {
+    booking_id: string;
+    latitude: number;
+    longitude: number;
+    heading: number;
+    speed: number;
+    eta_minutes: number;
+    status: 'dispatched' | 'en_route' | 'nearby' | 'arrived';
+    driver_name: string;
+    driver_phone: string;
+    vehicle_number: string;
+    vehicle_type: string;
+    updated_at: number;
+}
+
+export const trackingApi = {
+    /** Get latest location via REST (fallback) */
+    getLocation: (bookingId: string) =>
+        request<TrackingData>(`/tracking/${bookingId}/location`, {}, false),
+
+    /** Start simulation for demo/dev */
+    simulate: (bookingId: string) =>
+        request<{ ok: boolean; message: string }>(`/tracking/${bookingId}/simulate`, { method: 'POST' }, false),
+
+    /** Connect WebSocket for real-time updates */
+    connectWs: (bookingId: string, onMessage: (data: TrackingData) => void, onError?: (err: Event) => void): WebSocket => {
+        const ws = new WebSocket(`${WS_BASE}/tracking/${bookingId}/ws`);
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data) as TrackingData;
+                onMessage(data);
+            } catch { /* ignore non-JSON */ }
+        };
+        ws.onerror = (err) => onError?.(err);
+        return ws;
+    },
+};

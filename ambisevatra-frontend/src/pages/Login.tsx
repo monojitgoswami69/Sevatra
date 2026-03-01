@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../context/UserContext';
 import { authApi, setTokens } from '../services/api';
@@ -22,10 +22,13 @@ const Login = () => {
     const [resendTimer, setResendTimer] = useState(0);
 
     const navigate = useNavigate();
+    const location = useLocation();
     const { isLoggedIn, login: contextLogin, updateProfile, completeRegistration } = useUser();
 
+    const customMessage = location.state?.message;
+
     if (isLoggedIn && step === 'form') {
-        navigate('/profile');
+        navigate(location.state?.from || '/profile');
         return null;
     }
 
@@ -252,16 +255,7 @@ const Login = () => {
 
                             {/* Header */}
                             <div className="mb-10">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-blue to-accent-purple flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-white text-xl">
-                                            {mode === 'login' ? 'lock_open' : 'person_add'}
-                                        </span>
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-[0.2em] text-primary-blue">
-                                        {mode === 'login' ? 'Welcome Back' : 'Get Started'}
-                                    </span>
-                                </div>
+
                                 <h1 className="text-4xl sm:text-5xl font-black text-text-dark dark:text-white tracking-tight leading-[1.1]">
                                     {mode === 'login' ? 'Sign In' : 'Create '}
                                     <span className="bg-gradient-to-r from-primary-blue to-accent-purple bg-clip-text text-transparent">
@@ -269,7 +263,9 @@ const Login = () => {
                                     </span>
                                 </h1>
                                 <p className="text-text-gray dark:text-gray-400 text-base font-medium mt-3">
-                                    {mode === 'login'
+                                    {customMessage ? (
+                                        <span className="text-primary-blue font-bold">{customMessage}</span>
+                                    ) : mode === 'login'
                                         ? 'Access your emergency medical profile and booking history.'
                                         : 'We\'ll verify your email for your safety.'}
                                 </p>

@@ -60,27 +60,29 @@ const Header = () => {
                         <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success-green rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
                     </div>
                     <div className="flex flex-col justify-center">
-                        <span className="text-xl font-black text-text-dark dark:text-white font-display tracking-tight leading-none group-hover:text-primary-blue transition-colors">
+                        <span className="text-xl font-black text-text-dark dark:text-white font-display tracking-tight leading-none group-hover:text-primary-blue transition-colors" style={{ fontFamily: '"Space Mono", monospace' }}>
                             AmbiSevatra
                         </span>
                     </div>
                 </Link>
 
                 <nav className="flex items-center gap-3 sm:gap-5">
-                    <Link
-                        to="/about"
-                        className="hidden md:inline-flex items-center gap-1.5 text-text-dark dark:text-gray-300 hover:text-primary-blue transition-colors text-sm font-bold"
-                    >
-                        <span className="material-symbols-outlined text-base">info</span>
-                        About
-                    </Link>
 
-                    <div className="h-4 w-[1px] bg-gray-300 dark:bg-gray-700 hidden md:block"></div>
+                    {isLoggedIn && (
+                        <Link
+                            to="/booking-history"
+                            className="relative flex items-center justify-center w-9 h-9 rounded-full text-text-dark dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                            title="Booking History"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">history</span>
+                        </Link>
+                    )}
 
                     <button
                         onClick={toggleTheme}
                         className="relative flex items-center justify-center w-9 h-9 rounded-full text-text-dark dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
                         aria-label="Toggle Theme"
+                        title="Toggle Theme"
                     >
                         <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                             {theme === 'dark' ? 'light_mode' : 'dark_mode'}

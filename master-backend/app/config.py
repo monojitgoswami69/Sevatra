@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     twilio_phone_number: str = ""
 
     # ── App ──
-    app_name: str = "AmbiSevatra"
+    app_name: str = "Sevatra API"
     app_env: str = "development"
     cors_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:3000"
     secret_key: str = "change-this-to-a-random-secret-key"

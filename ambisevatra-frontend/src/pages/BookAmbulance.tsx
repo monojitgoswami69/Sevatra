@@ -103,7 +103,7 @@ const CustomDatePicker = ({ value, onChange }: { value: string; onChange: (v: st
 /* ─────────────────────────────────────────────
    Custom Time Picker
    ───────────────────────────────────────────── */
-const CustomTimePicker = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+const CustomTimePicker = ({ value, onChange, selectedDate }: { value: string; onChange: (v: string) => void; selectedDate?: string }) => {
     const [isOpen, setIsOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -140,12 +140,37 @@ const CustomTimePicker = ({ value, onChange }: { value: string; onChange: (v: st
     const pickPeriod = (p: 'AM' | 'PM') => { setPeriod(p); if (selHour !== null && selMin !== null) emit(selHour, selMin, p); };
 
     const hours = Array.from({ length: 12 }, (_, i) => i + 1);
-    const mins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+    const mins = Array.from({ length: 60 }, (_, i) => i);
 
     const display = value ? (() => {
         const [h, m] = value.split(':').map(Number);
         return `${(h % 12 || 12)}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
     })() : '';
+
+    const today = new Date();
+    const isToday = selectedDate === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const nowHour24 = today.getHours();
+    const nowMinute = today.getMinutes();
+
+    const isPastHour = (h: number, p: 'AM' | 'PM') => {
+        if (!isToday) return false;
+        const h24 = to24(h, p);
+        return h24 < nowHour24;
+    };
+
+    const isPastMinute = (h: number | null, m: number, p: 'AM' | 'PM') => {
+        if (!isToday || h === null) return false;
+        const h24 = to24(h, p);
+        if (h24 < nowHour24) return true;
+        if (h24 === nowHour24) return m < nowMinute;
+        return false;
+    };
+
+    const isPastPeriod = (p: 'AM' | 'PM') => {
+        if (!isToday) return false;
+        if (nowHour24 >= 12 && p === 'AM') return true;
+        return false;
+    };
 
     return (
         <div ref={ref} className="relative">
@@ -161,46 +186,69 @@ const CustomTimePicker = ({ value, onChange }: { value: string; onChange: (v: st
             <AnimatePresence>
                 {isOpen && (
                     <motion.div initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.96 }} transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-5 w-[340px]">
-                        {/* AM / PM */}
-                        <div className="flex items-center justify-center gap-1 mb-5 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-                            {(['AM', 'PM'] as const).map(p => (
-                                <button key={p} type="button" onClick={() => pickPeriod(p)}
-                                    className={`flex-1 py-2 rounded-lg text-sm font-black tracking-wider transition-all duration-200 ${period === p ? 'bg-white dark:bg-gray-700 text-primary-blue shadow-sm' : 'text-text-gray dark:text-gray-400'}`}>
-                                    {p}
-                                </button>
-                            ))}
-                        </div>
+                        className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-4 w-[280px]">
 
-                        <div className="flex gap-5">
+                        <div className="flex gap-2 h-48">
                             {/* Hours */}
-                            <div className="flex-1">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-text-gray/60 dark:text-gray-600 mb-2 text-center">Hour</p>
-                                <div className="grid grid-cols-4 gap-1">
-                                    {hours.map(h => (
-                                        <button key={h} type="button" onClick={() => pickHour(h)}
-                                            className={`h-10 rounded-xl text-sm font-semibold transition-all duration-150 flex items-center justify-center
-                                                ${selHour === h ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/30'
-                                                    : 'text-text-dark dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                            {h}
-                                        </button>
-                                    ))}
+                            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pr-1 relative">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-text-gray/60 dark:text-gray-600 mb-2 sticky top-0 bg-white dark:bg-gray-900 pb-1 z-10 text-center">Hr</p>
+                                <div className="flex flex-col gap-1">
+                                    {hours.map(h => {
+                                        const disabled = isPastHour(h, period);
+                                        return (
+                                            <button key={`h-${h}`} type="button" onClick={() => pickHour(h)} disabled={disabled}
+                                                className={`h-9 shrink-0 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center justify-center
+                                                    ${disabled ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed opacity-50' :
+                                                        selHour === h ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/30'
+                                                            : 'text-text-dark dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                                {h}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
+
                             {/* Divider */}
-                            <div className="w-px bg-gray-200 dark:bg-gray-700 my-6"></div>
+                            <div className="w-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+
                             {/* Minutes */}
-                            <div className="flex-1">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-text-gray/60 dark:text-gray-600 mb-2 text-center">Min</p>
-                                <div className="grid grid-cols-4 gap-1">
-                                    {mins.map(m => (
-                                        <button key={m} type="button" onClick={() => pickMin(m)}
-                                            className={`h-10 rounded-xl text-sm font-semibold transition-all duration-150 flex items-center justify-center
-                                                ${selMin === m ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/30'
-                                                    : 'text-text-dark dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                            {String(m).padStart(2, '0')}
-                                        </button>
-                                    ))}
+                            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] px-1 relative">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-text-gray/60 dark:text-gray-600 mb-2 sticky top-0 bg-white dark:bg-gray-900 pb-1 z-10 text-center">Min</p>
+                                <div className="flex flex-col gap-1">
+                                    {mins.map(m => {
+                                        const disabled = isPastMinute(selHour, m, period);
+                                        return (
+                                            <button key={`m-${m}`} type="button" onClick={() => pickMin(m)} disabled={disabled}
+                                                className={`h-9 shrink-0 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center justify-center
+                                                    ${disabled ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed opacity-50' :
+                                                        selMin === m ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/30'
+                                                            : 'text-text-dark dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                                {String(m).padStart(2, '0')}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="w-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+
+                            {/* Period */}
+                            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] pl-1 relative">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-text-gray/60 dark:text-gray-600 mb-2 sticky top-0 bg-white dark:bg-gray-900 pb-1 z-10 text-center">AM/PM</p>
+                                <div className="flex flex-col gap-1">
+                                    {(['AM', 'PM'] as const).map(p => {
+                                        const disabled = isPastPeriod(p);
+                                        return (
+                                            <button key={`p-${p}`} type="button" onClick={() => pickPeriod(p)} disabled={disabled}
+                                                className={`h-9 shrink-0 rounded-lg text-sm font-semibold transition-all duration-150 flex items-center justify-center
+                                                    ${disabled ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed opacity-50' :
+                                                        period === p ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/30'
+                                                            : 'text-text-dark dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                                {p}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -208,7 +256,7 @@ const CustomTimePicker = ({ value, onChange }: { value: string; onChange: (v: st
                         {/* Done */}
                         {selHour !== null && selMin !== null && (
                             <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} type="button" onClick={() => setIsOpen(false)}
-                                className="w-full mt-4 py-2.5 bg-primary-blue/10 text-primary-blue rounded-xl text-sm font-bold hover:bg-primary-blue/20 transition-colors flex items-center justify-center gap-2">
+                                className="w-full mt-4 py-2 bg-primary-blue/10 text-primary-blue rounded-xl text-sm font-bold hover:bg-primary-blue/20 transition-colors flex items-center justify-center gap-2">
                                 <span className="material-symbols-outlined text-base">check</span>
                                 {display}
                             </motion.button>
@@ -221,12 +269,20 @@ const CustomTimePicker = ({ value, onChange }: { value: string; onChange: (v: st
 };
 
 
+
 /* ─────────────────────────────────────────────
    Main Page Component
    ───────────────────────────────────────────── */
 const BookAmbulance = () => {
     const navigate = useNavigate();
     const { isLoggedIn, profile } = useUser();
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/login', { state: { message: 'Login to proceed with booking' }, replace: true });
+        }
+    }, [isLoggedIn, navigate]);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [customNote, setCustomNote] = useState('');
     const [formData, setFormData] = useState({
@@ -257,6 +313,8 @@ const BookAmbulance = () => {
         }
     }, [isLoggedIn, profile, didAutofill]);
 
+    if (!isLoggedIn) return null;
+
     const savedAddresses = isLoggedIn ? profile.addresses.filter(a => a.address.trim()) : [];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -272,7 +330,20 @@ const BookAmbulance = () => {
         if (!isFormValid) return;
         setIsSubmitting(true);
         try {
-            await bookingsApi.create({
+            // Try to get GPS for ambulance proximity assignment
+            let lat: number | undefined;
+            let lng: number | undefined;
+            if (navigator.geolocation) {
+                try {
+                    const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 })
+                    );
+                    lat = pos.coords.latitude;
+                    lng = pos.coords.longitude;
+                } catch { /* proceed without GPS */ }
+            }
+
+            const booking = await bookingsApi.create({
                 patient_name: formData.fullName,
                 patient_phone: formData.contactNumber,
                 patient_age: formData.age ? parseInt(formData.age) : undefined,
@@ -284,12 +355,14 @@ const BookAmbulance = () => {
                 reason: formData.reason || undefined,
                 special_needs: needs,
                 additional_notes: customNote || undefined,
+                latitude: lat,
+                longitude: lng,
             });
-            navigate('/ambulance-confirmed');
+            navigate('/ambulance-confirmed', { state: { booking } });
         } catch (err) {
             console.error('Booking failed:', err);
             // Still navigate for now — non-logged-in users get a local-only flow
-            navigate('/ambulance-confirmed');
+            navigate('/ambulance-confirmed', { state: { pickup: formData.pickup, destination: formData.destination } });
         } finally {
             setIsSubmitting(false);
         }
@@ -328,17 +401,11 @@ const BookAmbulance = () => {
             <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-28 pb-12">
                 {/* Header */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-14">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-blue to-accent-purple flex items-center justify-center">
-                            <span className="material-symbols-outlined text-white text-xl">calendar_month</span>
-                        </div>
-                        <span className="text-xs font-black uppercase tracking-[0.2em] text-primary-blue">Non-Emergency</span>
-                    </div>
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-text-dark dark:text-white tracking-tight leading-[1.1]">
                         Schedule{' '}
                         <span className="bg-gradient-to-r from-primary-blue to-accent-purple bg-clip-text text-transparent">Transport</span>
                     </h1>
-                    <p className="text-text-gray dark:text-gray-400 text-base lg:text-lg font-medium mt-4 max-w-2xl leading-relaxed">
+                    <p className="text-text-gray dark:text-gray-400 text-base lg:text-lg font-medium mt-4 max-w-none leading-relaxed">
                         Pre-book a comfortable medical ride for checkups, discharges, dialysis, or routine appointments.
                     </p>
                 </motion.div>
@@ -397,7 +464,7 @@ const BookAmbulance = () => {
                                 </div>
                                 <div>
                                     <label className={labelBase}>Time *</label>
-                                    <CustomTimePicker value={formData.time} onChange={(v) => setFormData(p => ({ ...p, time: v }))} />
+                                    <CustomTimePicker value={formData.time} onChange={(v) => setFormData(p => ({ ...p, time: v }))} selectedDate={formData.date} />
                                 </div>
                             </div>
 
