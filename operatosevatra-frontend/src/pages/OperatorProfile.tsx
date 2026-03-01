@@ -156,7 +156,7 @@ const OperatorProfile = () => {
                                     <div>
                                         <label className={labelClass}>Email</label>
                                         <p className="px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-text-gray text-sm font-medium">
-                                            {profile?.email || ctxProfile?.email || '—'}
+                                            {ctxProfile?.email || '—'}
                                         </p>
                                     </div>
                                 </div>
@@ -208,7 +208,7 @@ const OperatorProfile = () => {
                                     </div>
                                     <div>
                                         <label className={labelClass}>Email</label>
-                                        <p className={valueClass}>{profile?.email || ctxProfile?.email || '—'}</p>
+                                        <p className={valueClass}>{ctxProfile?.email || '—'}</p>
                                     </div>
                                     <div>
                                         <label className={labelClass}>Phone</label>

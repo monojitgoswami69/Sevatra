@@ -138,7 +138,7 @@ const Ambulances = () => {
                                 <div className="flex items-start gap-4 flex-1">
                                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center flex-shrink-0">
                                         <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">
-                                            {amb.ambulance_type === 'als' ? 'emergency' : amb.ambulance_type === 'bls' ? 'local_shipping' : 'airport_shuttle'}
+                                            {amb.ambulance_type === 'advanced' ? 'emergency' : amb.ambulance_type === 'basic' ? 'local_shipping' : 'airport_shuttle'}
                                         </span>
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -263,13 +263,13 @@ const Ambulances = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-xs font-bold uppercase tracking-wider text-text-gray block mb-1">Make</label>
-                                        <input value={editingAmbulance.vehicle_make}
+                                        <input value={editingAmbulance.vehicle_make ?? ''}
                                             onChange={e => setEditingAmbulance(prev => prev ? { ...prev, vehicle_make: e.target.value } : null)}
                                             className="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-text-dark dark:text-white text-sm font-medium outline-none focus:border-amber-500" />
                                     </div>
                                     <div>
                                         <label className="text-xs font-bold uppercase tracking-wider text-text-gray block mb-1">Model</label>
-                                        <input value={editingAmbulance.vehicle_model}
+                                        <input value={editingAmbulance.vehicle_model ?? ''}
                                             onChange={e => setEditingAmbulance(prev => prev ? { ...prev, vehicle_model: e.target.value } : null)}
                                             className="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-text-dark dark:text-white text-sm font-medium outline-none focus:border-amber-500" />
                                     </div>
@@ -277,7 +277,7 @@ const Ambulances = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-xs font-bold uppercase tracking-wider text-text-gray block mb-1">Year</label>
-                                        <input type="number" value={editingAmbulance.vehicle_year}
+                                        <input type="number" value={editingAmbulance.vehicle_year ?? ''}
                                             onChange={e => setEditingAmbulance(prev => prev ? { ...prev, vehicle_year: parseInt(e.target.value) } : null)}
                                             className="w-full px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 text-text-dark dark:text-white text-sm font-medium outline-none focus:border-amber-500" />
                                     </div>
