@@ -123,7 +123,7 @@ const Dashboard = () => {
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center flex-shrink-0">
                                         <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl">
-                                            {amb.ambulance_type === 'als' ? 'emergency' : amb.ambulance_type === 'bls' ? 'local_shipping' : 'airport_shuttle'}
+                                            {amb.ambulance_type === 'advanced' ? 'emergency' : amb.ambulance_type === 'basic' ? 'local_shipping' : 'airport_shuttle'}
                                         </span>
                                     </div>
                                     <div>

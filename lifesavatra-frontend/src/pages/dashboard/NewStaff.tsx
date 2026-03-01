@@ -23,7 +23,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ id, value, onChange, option
   }, [isOpen, onToggle]);
   return (
     <div className="relative" ref={ref}>
-      <button type="button" onClick={() => onToggle(isOpen ? null : id)}
+      <button type="button" onClick={() => onToggle(isOpen ? null : id ?? null)}
         className="w-full flex items-center justify-between rounded-xl border px-4 py-3 bg-muted border-border hover:border-primary text-left transition-all cursor-pointer focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(19,236,19,0.2)]">
         <span className={`flex items-center gap-2 text-sm ${selected ? 'text-card-foreground' : 'text-muted-foreground'}`}>
           {selected?.icon && <span className="material-symbols-outlined text-primary text-base">{selected.icon}</span>}
@@ -98,7 +98,7 @@ const CustomDatePicker: React.FC<CustomSelectProps> = ({ id, value, onChange, pl
 
   return (
     <div className="relative" ref={ref}>
-      <button type="button" onClick={() => onToggle(isOpen ? null : id)}
+      <button type="button" onClick={() => onToggle(isOpen ? null : id ?? null)}
         className="w-full flex items-center justify-between rounded-xl border px-4 py-3 bg-muted border-border hover:border-primary text-left transition-all cursor-pointer focus:outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(19,236,19,0.2)]">
         <span className={`flex items-center gap-2 text-sm ${value ? 'text-card-foreground' : 'text-muted-foreground'}`}>
           <span className="material-symbols-outlined text-primary text-base">calendar_month</span>
@@ -160,7 +160,7 @@ const CustomDatePicker: React.FC<CustomSelectProps> = ({ id, value, onChange, pl
 
 const NewStaff: React.FC = () => {
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
+  const [, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [isActiveStatus, setIsActiveStatus] = useState(true);
   const [onCallDuty, setOnCallDuty] = useState('yes');
@@ -266,12 +266,6 @@ const NewStaff: React.FC = () => {
     updated[index] = { ...updated[index], [field]: value };
     setCredentials(updated);
   };
-
-  const addCredential = () => {
-    setCredentials([...credentials, { degree: '', specialization: '', institution: '', completionYear: '' }]);
-  };
-
-
 
   const handleWorkingDayToggle = (day: keyof typeof workingDays) => {
     setWorkingDays(prev => ({ ...prev, [day]: !prev[day] }));

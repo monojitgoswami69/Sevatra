@@ -280,7 +280,7 @@ const Profile = () => {
                                                     <div className="flex gap-2 items-end">
                                                         <input type="text" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                                             className={`${inputBase} flex-1`} placeholder="Enter OTP code" maxLength={6} />
-                                                        <button type="button" onClick={verifyPhoneOtp} disabled={otpStep === 'verifying' || !otpCode}
+                                                        <button type="button" onClick={verifyPhoneOtp} disabled={!otpCode}
                                                             className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-success-green/10 text-success-green hover:bg-success-green/20 transition-all disabled:opacity-40 whitespace-nowrap">
                                                             <span className="material-symbols-outlined text-sm">check</span>
                                                             Confirm

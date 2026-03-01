@@ -183,7 +183,7 @@ const Login = () => {
     useEffect(() => {
         if (step === 'form') {
             const init = () => {
-                const g = (window as Record<string, unknown>).google as Record<string, Record<string, { initialize: (o: object) => void; renderButton: (el: HTMLElement, o: object) => void }>> | undefined;
+                const g = (window as unknown as Record<string, unknown>).google as Record<string, Record<string, { initialize: (o: object) => void; renderButton: (el: HTMLElement, o: object) => void }>> | undefined;
                 if (g?.accounts?.id) {
                     try {
                         g.accounts.id.initialize({
