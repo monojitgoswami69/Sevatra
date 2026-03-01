@@ -34,9 +34,9 @@ const Staff: React.FC = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleToggleDuty = async (staffId: string) => {
+  const handleToggleDuty = async (staffId: string, currentDutyStatus?: boolean) => {
     try {
-      await updateDutyStatus(staffId);
+      await updateDutyStatus(staffId, currentDutyStatus !== undefined ? !currentDutyStatus : undefined);
       fetchData();
     } catch (err) { console.error(err); }
   };
@@ -254,7 +254,7 @@ const Staff: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <button onClick={() => handleToggleDuty(staff.staff_id)} className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border cursor-pointer transition-all ${
+                        <button onClick={() => handleToggleDuty(staff.staff_id, staff.on_duty)} className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border cursor-pointer transition-all ${
                           staff.on_duty
                             ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20'
                             : 'bg-muted text-muted-foreground border-border hover:bg-card'
@@ -267,7 +267,7 @@ const Staff: React.FC = () => {
                         <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                           {staff.on_duty ? (
                             <button
-                              onClick={() => handleToggleDuty(staff.staff_id)}
+                              onClick={() => handleToggleDuty(staff.staff_id, staff.on_duty)}
                               title="Mark Absent"
                               className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 hover:border-red-500/60 transition-all"
                             >
@@ -275,7 +275,7 @@ const Staff: React.FC = () => {
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleToggleDuty(staff.staff_id)}
+                              onClick={() => handleToggleDuty(staff.staff_id, staff.on_duty)}
                               title="Mark Present"
                               className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 hover:border-primary/60 transition-all"
                             >

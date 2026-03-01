@@ -104,7 +104,7 @@ const Dashboard: React.FC = () => {
   const handleDischarge = async (patientId: string, patientName: string) => {
     if (!confirm(`Are you sure you want to discharge ${patientName}?`)) return;
     try {
-      await dischargePatient(parseInt(patientId));
+      await dischargePatient(parseInt(patientId.replace(/\D/g, '')));
       fetchDashboardStats();
       fetchAdmittedPatients();
     } catch (err) {

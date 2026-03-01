@@ -136,6 +136,18 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+async function apiRaw(path: string, init?: RequestInit): Promise<Response> {
+  const res = await fetch(`${API}${path}`, {
+    headers: { ...getAuthHeaders(), ...init?.headers },
+    ...init,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `API error ${res.status}`);
+  }
+  return res;
+}
+
 function qs(params: Record<string, string | number | boolean | undefined>): string {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined);
   if (entries.length === 0) return '';
@@ -159,8 +171,8 @@ export const getAllAdmissions = async (params?: {
   const raw = await api<{ admissions: AdmittedPatient[]; total: number }>(
     `/life/admissions/${qs({
       condition: params?.condition,
-      minSeverity: params?.minSeverity,
-      maxSeverity: params?.maxSeverity,
+      min_severity: params?.minSeverity,
+      max_severity: params?.maxSeverity,
       limit: params?.limit,
       offset: params?.offset,
     })}`
@@ -230,8 +242,8 @@ export const getBedStats = async (): Promise<{ success: boolean; data: BedStatsD
   return { success: true, data: raw };
 };
 
-export const assignBed = async (bedId: string, patientId: number | string): Promise<{ success: boolean; message: string }> => {
-  await api(`/life/beds/${bedId}/assign`, { method: 'PUT', body: JSON.stringify({ patient_id: String(patientId) }) });
+export const assignBed = async (bedId: string, patientId: number | string, patientName: string, condition: string = 'Stable'): Promise<{ success: boolean; message: string }> => {
+  await api(`/life/beds/${bedId}/assign`, { method: 'PUT', body: JSON.stringify({ patient_id: String(patientId), patient_name: patientName, condition }) });
   return { success: true, message: 'Bed assigned' };
 };
 
@@ -246,8 +258,56 @@ export const dischargePatient = async (
 ): Promise<{ success: boolean; message: string; data: { patientId: number; patientName: string; releasedBed: string; dischargedAt: string } }> => {
   const raw = await api<{ patientId: number; patientName: string; releasedBed: string; dischargedAt: string }>(`/life/admissions/${patientId}/discharge`, {
     method: 'POST',
-    body: JSON.stringify({ discharge_notes: dischargeNotes }),
+    body: JSON.stringify({ dischargeNotes }),
   });
   return { success: true, message: 'Patient discharged', data: raw };
+};
+
+// ── File Management ──────────────────────────────────────────────────────────
+
+export interface FileUploadResponse {
+  success: boolean;
+  message: string;
+  data: {
+    url: string;
+    name: string;
+    path: string;
+    size: number;
+    dropbox_id: string;
+  };
+}
+
+export const uploadFile = async (file: File): Promise<FileUploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await apiRaw('/life/files/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  return res.json();
+};
+
+export const listFiles = async (): Promise<{ files: Array<{ name: string; path: string; size: number; id: string }> }> =>
+  api('/life/files/list');
+
+export const deleteFile = async (path: string): Promise<{ success: boolean; deleted: unknown }> =>
+  api(`/life/files/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+
+// ── Severity Calculation (server-side) ───────────────────────────────────────
+
+export const calculateSeverityServer = async (
+  vitals: { heartRate?: number; spo2?: number; respRate?: number; temperature?: number; bpSystolic?: number; bpDiastolic?: number }
+): Promise<{ score: number; condition: string; wardRecommendation: string; riskFactors: string[]; summary: string; percentage: number; urgency: string }> => {
+  // This endpoint requires no auth
+  const res = await fetch(`${API}/life/vitals/calculate-severity`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(vitals),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `API error ${res.status}`);
+  }
+  return res.json();
 };
 

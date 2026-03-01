@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createAdmission, getBedStats, type AdmissionPayload } from '../../services/admissionService';
+import { createAdmission, getBedStats, uploadFile, calculateSeverityServer, type AdmissionPayload } from '../../services/admissionService';
 import { calculateSeverityScore as calculateSeverity } from '../../utils/severityCalculator';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavbar } from '../../context/NavbarContext';
@@ -97,6 +97,7 @@ const NewAdmission: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<'patient' | 'id' | null>(null);
   const [bedAvailability, setBedAvailability] = useState<{
     allocatedBed: string | null;
     severityScore: number;
@@ -111,6 +112,22 @@ const NewAdmission: React.FC = () => {
 
   const handlePatientDataChange = (field: keyof PatientData, value: string) => {
     setPatientData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (file: File, field: 'patientPicture' | 'idPicture') => {
+    const which = field === 'patientPicture' ? 'patient' : 'id';
+    setUploadingFile(which);
+    try {
+      const result = await uploadFile(file);
+      if (result.success && result.data?.url) {
+        handlePatientDataChange(field, result.data.url);
+      }
+    } catch (err) {
+      console.error(`Failed to upload ${field}:`, err);
+      setError(`Failed to upload file: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setUploadingFile(null);
+    }
   };
 
   const handleSaveAdmission = async () => {
@@ -188,7 +205,7 @@ const NewAdmission: React.FC = () => {
       setError(null);
       setBedAvailability(null);
 
-      // Calculate severity score using the imported function
+      // Calculate severity score — prefer server-side, fallback to local
       const vitalSigns = {
         heartRate: vitals.heartRate ? parseInt(vitals.heartRate) : undefined,
         spo2: vitals.spo2 ? parseInt(vitals.spo2) : undefined,
@@ -197,9 +214,15 @@ const NewAdmission: React.FC = () => {
         bpSystolic: vitals.bpSystolic ? parseInt(vitals.bpSystolic) : undefined,
         bpDiastolic: vitals.bpDiastolic ? parseInt(vitals.bpDiastolic) : undefined,
       };
-      
-      const severityResult = calculateSeverity(vitalSigns);
-      const severityScore = severityResult.score;
+
+      let severityScore: number;
+      try {
+        const serverResult = await calculateSeverityServer(vitalSigns);
+        severityScore = serverResult.score;
+      } catch {
+        const localResult = calculateSeverity(vitalSigns);
+        severityScore = localResult.score;
+      }
 
       // Fetch current bed stats
       const statsRes = await getBedStats();
@@ -584,14 +607,20 @@ const NewAdmission: React.FC = () => {
                             className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
                             type="file"
                             accept="image/*"
+                            disabled={uploadingFile === 'patient'}
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                // Handle file upload here
-                                console.log('Patient Picture selected:', file);
+                                handleFileUpload(file, 'patientPicture');
                               }
                             }}
                           />
+                          {uploadingFile === 'patient' && (
+                            <p className="text-xs text-primary mt-1 flex items-center gap-1"><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> Uploading...</p>
+                          )}
+                          {patientData.patientPicture && !uploadingFile && (
+                            <p className="text-xs text-green-400 mt-1 flex items-center gap-1"><span className="material-symbols-outlined text-sm">check_circle</span> Uploaded</p>
+                          )}
                         </label>
 
                         <div className="flex flex-col">
@@ -666,14 +695,20 @@ const NewAdmission: React.FC = () => {
                             className="form-input block w-full rounded-xl border px-4 py-3 transition-all shadow-sm focus:outline-0 focus:ring-0 text-card-foreground border-border bg-muted focus:border-primary focus:bg-muted focus:shadow-[0_0_20px_rgba(19,236,19,0.2)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-green-950 hover:file:bg-[#3bf03b] file:cursor-pointer"
                             type="file"
                             accept="image/*"
+                            disabled={uploadingFile === 'id'}
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                // Handle file upload here
-                                console.log('ID Picture selected:', file);
+                                handleFileUpload(file, 'idPicture');
                               }
                             }}
                           />
+                          {uploadingFile === 'id' && (
+                            <p className="text-xs text-primary mt-1 flex items-center gap-1"><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span> Uploading...</p>
+                          )}
+                          {patientData.idPicture && !uploadingFile && (
+                            <p className="text-xs text-green-400 mt-1 flex items-center gap-1"><span className="material-symbols-outlined text-sm">check_circle</span> Uploaded</p>
+                          )}
                         </label>
                       </div>
                     </div>

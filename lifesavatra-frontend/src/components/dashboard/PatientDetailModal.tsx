@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Patient } from '../../types';
 import { getSeverityColor, getSeverityTextColor, getConditionStyles, calculateSeverityScore } from '../../utils/severityCalculator';
-import { updateVitals } from '../../services/admissionService';
+import { updateVitals, calculateSeverityServer } from '../../services/admissionService';
 
 interface PatientDetailModalProps {
   patient: Patient;
@@ -64,14 +64,28 @@ const PatientDetailModal: React.FC<PatientDetailModalProps> = ({ patient, onClos
     try {
       setIsUpdating(true);
       // Call API to update vitals
-      const result = await updateVitals(parseInt(patient.id), vitalSigns);
+      const result = await updateVitals(parseInt(patient.id.replace(/\D/g, '')), vitalSigns);
       if (result.success) {
         setSeverityScore(result.data.severity_score);
         onUpdated();
+        return;
       }
     } catch (err) {
       console.error('Error updating vitals:', err);
-      // Fallback to local calculation
+    }
+
+    // Fallback: try server-side severity calculation (no auth required)
+    try {
+      const serverResult = await calculateSeverityServer(vitalSigns);
+      if (serverResult && typeof serverResult.score === 'number') {
+        setSeverityScore(serverResult.score);
+      } else {
+        // Final fallback: local calculation
+        const localResult = calculateSeverityScore(vitalSigns);
+        setSeverityScore(localResult.score);
+      }
+    } catch {
+      // Final fallback: local calculation
       const localResult = calculateSeverityScore(vitalSigns);
       setSeverityScore(localResult.score);
     } finally {

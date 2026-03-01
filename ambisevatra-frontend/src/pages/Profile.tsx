@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser, type SavedAddress } from '../context/UserContext';
-import { usersApi } from '../services/api';
+import { usersApi, authApi } from '../services/api';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -38,12 +38,63 @@ const Profile = () => {
     const [conditions, setConditions] = useState<string[]>(profile.medicalConditions);
     const [newCondition, setNewCondition] = useState('');
 
+    // Phone OTP verification
+    const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle');
+    const [otpCode, setOtpCode] = useState('');
+    const [otpMsg, setOtpMsg] = useState('');
+    const [phoneVerified, setPhoneVerified] = useState(false);
+
     if (!isLoggedIn) {
         navigate('/login');
         return null;
     }
 
     const flash = (msg: string) => { setSaveMsg(msg); setTimeout(() => setSaveMsg(''), 2500); };
+
+    const sendPhoneOtp = async () => {
+        if (!personal.phone || personal.phone.length < 10) {
+            setOtpMsg('Enter a valid phone number first');
+            return;
+        }
+        try {
+            setOtpStep('verifying');
+            const res = await authApi.sendOtp(personal.phone);
+            if (res.success) {
+                setOtpStep('sent');
+                setOtpMsg('OTP sent to ' + personal.phone);
+            } else {
+                setOtpStep('idle');
+                setOtpMsg(res.message || 'Failed to send OTP');
+            }
+        } catch (err) {
+            setOtpStep('idle');
+            setOtpMsg(err instanceof Error ? err.message : 'Failed to send OTP');
+        }
+    };
+
+    const verifyPhoneOtp = async () => {
+        if (!otpCode || otpCode.length < 4) {
+            setOtpMsg('Enter the OTP code');
+            return;
+        }
+        try {
+            setOtpStep('verifying');
+            const res = await authApi.verifyOtp(personal.phone, otpCode);
+            if (res.success) {
+                setPhoneVerified(true);
+                setOtpStep('idle');
+                setOtpCode('');
+                setOtpMsg('');
+                flash('Phone verified!');
+            } else {
+                setOtpStep('sent');
+                setOtpMsg(res.message || 'Invalid OTP');
+            }
+        } catch (err) {
+            setOtpStep('sent');
+            setOtpMsg(err instanceof Error ? err.message : 'Verification failed');
+        }
+    };
 
     const savePersonal = async () => {
         setIsSaving(true);
@@ -207,7 +258,38 @@ const Profile = () => {
                                 <div>
                                     <label className={labelBase}>Phone</label>
                                     {isEditing
-                                        ? <input type="tel" value={personal.phone} onChange={e => setPersonal(p => ({ ...p, phone: e.target.value }))} className={inputBase} placeholder="+91 98765 43210" />
+                                        ? (
+                                            <div className="space-y-2">
+                                                <div className="flex gap-2 items-end">
+                                                    <input type="tel" value={personal.phone} onChange={e => { setPersonal(p => ({ ...p, phone: e.target.value })); setPhoneVerified(false); setOtpStep('idle'); }} className={`${inputBase} flex-1`} placeholder="+91 98765 43210" />
+                                                    {!phoneVerified && (
+                                                        <button type="button" onClick={sendPhoneOtp} disabled={otpStep === 'verifying' || !personal.phone}
+                                                            className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-primary-blue/10 text-primary-blue hover:bg-primary-blue/20 transition-all disabled:opacity-40 whitespace-nowrap">
+                                                            <span className="material-symbols-outlined text-sm">{otpStep === 'verifying' ? 'progress_activity' : 'send'}</span>
+                                                            {otpStep === 'sent' ? 'Resend OTP' : 'Verify'}
+                                                        </button>
+                                                    )}
+                                                    {phoneVerified && (
+                                                        <span className="flex items-center gap-1 text-success-green text-xs font-bold py-2">
+                                                            <span className="material-symbols-outlined text-sm">verified</span>
+                                                            Verified
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {otpStep === 'sent' && (
+                                                    <div className="flex gap-2 items-end">
+                                                        <input type="text" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                            className={`${inputBase} flex-1`} placeholder="Enter OTP code" maxLength={6} />
+                                                        <button type="button" onClick={verifyPhoneOtp} disabled={otpStep === 'verifying' || !otpCode}
+                                                            className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold bg-success-green/10 text-success-green hover:bg-success-green/20 transition-all disabled:opacity-40 whitespace-nowrap">
+                                                            <span className="material-symbols-outlined text-sm">check</span>
+                                                            Confirm
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {otpMsg && <p className="text-xs text-text-gray dark:text-gray-400">{otpMsg}</p>}
+                                            </div>
+                                        )
                                         : <p className="text-base font-semibold text-text-dark dark:text-white py-3">{personal.phone || '—'}</p>}
                                 </div>
                                 <div>

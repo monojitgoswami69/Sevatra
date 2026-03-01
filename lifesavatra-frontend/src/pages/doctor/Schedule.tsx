@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { getSchedule, updateScheduleStatus } from '../../services/doctorService';
+import { getSchedule, updateScheduleStatus, createScheduleSlot } from '../../services/doctorService';
 import type { ScheduleSlot } from '../../types/dashboard.types';
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
@@ -36,6 +36,15 @@ const Schedule: React.FC = () => {
   const navigate = useNavigate();
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingSlot, setAddingSlot] = useState(false);
+  const [newSlot, setNewSlot] = useState({
+    time: '',
+    patient_name: '',
+    patient_id: '',
+    type: 'consultation',
+    notes: '',
+  });
 
   useEffect(() => {
     getSchedule().then(setSlots).finally(() => setLoading(false));
@@ -50,6 +59,28 @@ const Schedule: React.FC = () => {
     }
   };
 
+  const handleAddSlot = async () => {
+    if (!newSlot.time || !newSlot.type) return;
+    try {
+      setAddingSlot(true);
+      const created = await createScheduleSlot({
+        time: newSlot.time,
+        patient_name: newSlot.patient_name || undefined,
+        patient_id: newSlot.patient_id || undefined,
+        type: newSlot.type,
+        notes: newSlot.notes || undefined,
+        status: 'scheduled',
+      });
+      setSlots(prev => [...prev, created].sort((a, b) => a.time.localeCompare(b.time)));
+      setShowAddModal(false);
+      setNewSlot({ time: '', patient_name: '', patient_id: '', type: 'consultation', notes: '' });
+    } catch (err) {
+      console.error('Failed to create slot:', err);
+    } finally {
+      setAddingSlot(false);
+    }
+  };
+
   const completed = slots.filter(s => s.status === 'completed').length;
   const inProgress = slots.find(s => s.status === 'in-progress');
 
@@ -57,12 +88,19 @@ const Schedule: React.FC = () => {
     <DashboardLayout>
       <div className="relative z-10 p-6 lg:p-8 space-y-6">
         {/* Header */}
-        <header>
-          <h1 className="text-2xl lg:text-3xl font-bold text-card-foreground tracking-tight">Today's Schedule</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            &nbsp;•&nbsp;{completed}/{slots.length} completed
-          </p>
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-card-foreground tracking-tight">Today's Schedule</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              &nbsp;•&nbsp;{completed}/{slots.length} completed
+            </p>
+          </div>
+          <button onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20">
+            <span className="material-symbols-outlined text-lg">add</span>
+            Add Slot
+          </button>
         </header>
 
         {/* Progress bar */}
@@ -178,6 +216,66 @@ const Schedule: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Add Slot Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
+            <div className="bg-card rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 p-6 space-y-5" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-card-foreground">Add Schedule Slot</h2>
+                <button onClick={() => setShowAddModal(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                  <span className="material-symbols-outlined text-muted-foreground">close</span>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Time *</label>
+                  <input type="time" value={newSlot.time} onChange={e => setNewSlot(s => ({ ...s, time: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-card-foreground focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Type *</label>
+                  <select value={newSlot.type} onChange={e => setNewSlot(s => ({ ...s, type: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-card-foreground focus:outline-none focus:border-primary">
+                    <option value="consultation">Consultation</option>
+                    <option value="follow-up">Follow-up</option>
+                    <option value="procedure">Procedure</option>
+                    <option value="rounds">Rounds</option>
+                    <option value="break">Break</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Patient Name</label>
+                  <input type="text" value={newSlot.patient_name} onChange={e => setNewSlot(s => ({ ...s, patient_name: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-card-foreground focus:outline-none focus:border-primary" placeholder="Optional" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Patient ID</label>
+                  <input type="text" value={newSlot.patient_id} onChange={e => setNewSlot(s => ({ ...s, patient_id: e.target.value }))}
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-card-foreground focus:outline-none focus:border-primary" placeholder="Optional" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
+                  <textarea value={newSlot.notes} onChange={e => setNewSlot(s => ({ ...s, notes: e.target.value }))} rows={2}
+                    className="w-full rounded-xl border border-border bg-muted px-4 py-2.5 text-card-foreground focus:outline-none focus:border-primary resize-none" placeholder="Optional notes" />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  Cancel
+                </button>
+                <button onClick={handleAddSlot} disabled={addingSlot || !newSlot.time}
+                  className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-bold bg-primary text-green-950 hover:bg-[#3bf03b] transition-all disabled:opacity-50">
+                  <span className="material-symbols-outlined text-sm">{addingSlot ? 'progress_activity' : 'add'}</span>
+                  {addingSlot ? 'Adding...' : 'Add Slot'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

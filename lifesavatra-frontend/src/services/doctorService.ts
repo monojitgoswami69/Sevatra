@@ -95,6 +95,16 @@ export const getSchedule = async (): Promise<ScheduleSlot[]> => {
   return res.schedule;
 };
 
+export const createScheduleSlot = async (data: {
+  time: string;
+  patient_name?: string;
+  patient_id?: string;
+  type: string;
+  notes?: string;
+  status?: string;
+}): Promise<ScheduleSlot> =>
+  api<ScheduleSlot>('/life/doctor/schedule', { method: 'POST', body: JSON.stringify(data) });
+
 export const updateScheduleStatus = async (slotId: string, status: string): Promise<ScheduleSlot> =>
   api<ScheduleSlot>(`/life/doctor/schedule/${slotId}`, { method: 'PUT', body: JSON.stringify({ status }) });
 

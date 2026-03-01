@@ -104,6 +104,17 @@ export const authApi = {
         ),
 
     logout: () => request('/auth/logout', { method: 'POST' }).catch(() => ({ message: 'logged out' })),
+
+    // General-purpose OTP (phone verification, etc.)
+    sendOtp: (phone: string, purpose = 'phone_verification') =>
+        request<{ success: boolean; message: string }>(
+            '/auth/otp/send', { method: 'POST', body: JSON.stringify({ phone, purpose }) }, false,
+        ),
+
+    verifyOtp: (phone: string, code: string, purpose = 'phone_verification') =>
+        request<{ success: boolean; message: string }>(
+            '/auth/otp/verify', { method: 'POST', body: JSON.stringify({ phone, code, purpose }) }, false,
+        ),
 };
 
 
@@ -146,7 +157,7 @@ export const usersApi = {
         request<ProfileData>('/users/me', { method: 'PUT', body: JSON.stringify(data) }),
 
     listAddresses: () => request<AddressData[]>('/users/me/addresses'),
-    createAddress: (data: { label: string; address: string; icon?: string }) =>
+    createAddress: (data: { label: string; address: string; icon: string }) =>
         request<AddressData>('/users/me/addresses', { method: 'POST', body: JSON.stringify(data) }),
     deleteAddress: (id: string) => request('/users/me/addresses/' + id, { method: 'DELETE' }),
 
@@ -235,130 +246,5 @@ export const sosApi = {
 
     cancel: (sosId: string, reason?: string) =>
         request<SosData>(`/sos/${sosId}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }, false),
-
-    list: () => request<SosData[]>('/sos/', {}, false),
 };
 
-// ── Operator API ──
-
-export type OperatorType = 'individual' | 'provider';
-export type AmbulanceType = 'basic' | 'advanced' | 'patient_transport' | 'neonatal' | 'air';
-export type AmbulanceStatus = 'available' | 'on_trip' | 'maintenance' | 'off_duty';
-
-export interface OperatorData {
-    id: string;
-    user_id: string;
-    operator_type: OperatorType;
-    full_name: string;
-    phone: string;
-    facility_name: string | null;
-    facility_address: string | null;
-    facility_phone: string | null;
-    license_number: string | null;
-    is_verified: boolean;
-    ambulance_count: number;
-    created_at: string | null;
-    updated_at: string | null;
-}
-
-export interface AmbulanceData {
-    id: string;
-    operator_id: string;
-    vehicle_number: string;
-    ambulance_type: AmbulanceType;
-    status: AmbulanceStatus;
-    vehicle_make: string | null;
-    vehicle_model: string | null;
-    vehicle_year: number | null;
-    has_oxygen: boolean;
-    has_defibrillator: boolean;
-    has_stretcher: boolean;
-    has_ventilator: boolean;
-    has_first_aid: boolean;
-    driver_name: string;
-    driver_phone: string;
-    driver_license_number: string;
-    driver_experience_years: number | null;
-    driver_photo_url: string | null;
-    base_latitude: number | null;
-    base_longitude: number | null;
-    base_address: string | null;
-    service_radius_km: number | null;
-    price_per_km: number | null;
-    notes: string | null;
-    created_at: string | null;
-    updated_at: string | null;
-}
-
-export interface DashboardStats {
-    total_ambulances: number;
-    available_ambulances: number;
-    on_trip_ambulances: number;
-    maintenance_ambulances: number;
-    off_duty_ambulances: number;
-    total_trips_completed: number;
-    operator_type: OperatorType;
-    facility_name: string | null;
-}
-
-export const operatorApi = {
-    // Registration
-    register: (data: {
-        operator_type: OperatorType;
-        full_name: string;
-        phone: string;
-        facility_name?: string;
-        facility_address?: string;
-        facility_phone?: string;
-        license_number?: string;
-    }) => request<OperatorData>('/operator/register', { method: 'POST', body: JSON.stringify(data) }),
-
-    // Profile
-    getProfile: () => request<OperatorData>('/operator/profile'),
-    updateProfile: (data: Partial<Omit<OperatorData, 'id' | 'user_id' | 'is_verified' | 'ambulance_count' | 'created_at' | 'updated_at'>>) =>
-        request<OperatorData>('/operator/profile', { method: 'PUT', body: JSON.stringify(data) }),
-
-    // Check status
-    checkStatus: () => request<{ is_operator: boolean; operator: OperatorData | null }>('/operator/check'),
-
-    // Dashboard
-    getDashboard: () => request<DashboardStats>('/operator/dashboard'),
-
-    // Ambulances
-    createAmbulance: (data: {
-        vehicle_number: string;
-        ambulance_type?: AmbulanceType;
-        vehicle_make?: string;
-        vehicle_model?: string;
-        vehicle_year?: number;
-        has_oxygen?: boolean;
-        has_defibrillator?: boolean;
-        has_stretcher?: boolean;
-        has_ventilator?: boolean;
-        has_first_aid?: boolean;
-        driver_name: string;
-        driver_phone: string;
-        driver_license_number: string;
-        driver_experience_years?: number;
-        driver_photo_url?: string;
-        base_latitude?: number;
-        base_longitude?: number;
-        base_address?: string;
-        service_radius_km?: number;
-        price_per_km?: number;
-        notes?: string;
-    }) => request<AmbulanceData>('/operator/ambulances', { method: 'POST', body: JSON.stringify(data) }),
-
-    listAmbulances: () => request<AmbulanceData[]>('/operator/ambulances'),
-
-    getAmbulance: (id: string) => request<AmbulanceData>(`/operator/ambulances/${id}`),
-
-    updateAmbulance: (id: string, data: Partial<AmbulanceData>) =>
-        request<AmbulanceData>(`/operator/ambulances/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-
-    deleteAmbulance: (id: string) =>
-        request<{ success: boolean; message: string }>(`/operator/ambulances/${id}`, { method: 'DELETE' }),
-
-    updateAmbulanceStatus: (id: string, status: AmbulanceStatus) =>
-        request<AmbulanceData>(`/operator/ambulances/${id}/status?new_status=${status}`, { method: 'PATCH' }),
-};
