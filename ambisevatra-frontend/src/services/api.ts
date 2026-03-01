@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api/v1';
+const API_BASE = 'https://api-sevatra.vercel.app/api/v1';
 
 // ── Token Management ──
 
