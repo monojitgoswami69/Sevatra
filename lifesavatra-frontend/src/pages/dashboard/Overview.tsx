@@ -21,6 +21,8 @@ const Dashboard: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages] = useState(1);
+  const [dischargeConfirm, setDischargeConfirm] = useState<{ patientId: string; patientName: string } | null>(null);
+  const [isDischarging, setIsDischarging] = useState(false);
   
   // Dashboard statistics
   const [dashboardStats, setDashboardStats] = useState({
@@ -101,15 +103,23 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleDischarge = async (patientId: string, patientName: string) => {
-    if (!confirm(`Are you sure you want to discharge ${patientName}?`)) return;
+  const handleDischarge = (patientId: string, patientName: string) => {
+    setDischargeConfirm({ patientId, patientName });
+  };
+
+  const confirmDischarge = async () => {
+    if (!dischargeConfirm) return;
+    setIsDischarging(true);
     try {
-      await dischargePatient(parseInt(patientId.replace(/\D/g, '')));
+      await dischargePatient(dischargeConfirm.patientId.replace(/^P-/, ''));
+      setDischargeConfirm(null);
       fetchDashboardStats();
       fetchAdmittedPatients();
     } catch (err) {
       console.error('Discharge error:', err);
       alert('Failed to discharge patient.');
+    } finally {
+      setIsDischarging(false);
     }
   };
 
@@ -193,6 +203,50 @@ const Dashboard: React.FC = () => {
           onClose={() => setSelectedPatient(null)}
           onUpdated={refreshAll}
         />
+      )}
+
+      {/* Discharge Confirmation Modal */}
+      {dischargeConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-card rounded-2xl border border-border shadow-2xl p-8 flex flex-col items-center gap-6">
+            <div className="h-16 w-16 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+              <span className="material-symbols-outlined text-red-400 text-3xl">warning</span>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-card-foreground mb-2">Discharge Patient?</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                You are about to discharge <span className="font-bold text-card-foreground">{dischargeConfirm.patientName}</span>.<br />
+                This will release their bed and remove them from the active patient list.
+              </p>
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setDischargeConfirm(null)}
+                disabled={isDischarging}
+                className="flex-1 py-3 rounded-xl border border-border bg-transparent text-muted-foreground hover:text-card-foreground hover:border-card-foreground/30 font-bold text-sm transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDischarge}
+                disabled={isDischarging}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDischarging ? (
+                  <>
+                    <span className="material-symbols-outlined text-base animate-spin">refresh</span>
+                    Discharging...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    Confirm Discharge
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </DashboardLayout>
   );

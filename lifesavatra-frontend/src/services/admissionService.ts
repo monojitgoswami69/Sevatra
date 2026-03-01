@@ -38,7 +38,7 @@ export interface AdmissionPayload {
 }
 
 export interface AdmittedPatient {
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   age: number;
   gender: string;

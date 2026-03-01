@@ -30,7 +30,7 @@ const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'num
 
 export const INITIAL_PATIENTS: AdmittedPatient[] = [
   {
-    patient_id: 1,
+    patient_id: '1',
     patient_name: 'Arjun Verma',
     age: 45,
     gender: 'male',
@@ -62,7 +62,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 2,
+    patient_id: '2',
     patient_name: 'Priya Sharma',
     age: 32,
     gender: 'female',
@@ -94,7 +94,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 3,
+    patient_id: '3',
     patient_name: 'Rahul Desai',
     age: 58,
     gender: 'male',
@@ -126,7 +126,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 4,
+    patient_id: '4',
     patient_name: 'Sanya Gupta',
     age: 24,
     gender: 'female',
@@ -158,7 +158,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 5,
+    patient_id: '5',
     patient_name: 'Vikram Singh',
     age: 67,
     gender: 'male',
@@ -190,7 +190,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 6,
+    patient_id: '6',
     patient_name: 'Lakshmi Iyer',
     age: 41,
     gender: 'female',
@@ -222,7 +222,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 7,
+    patient_id: '7',
     patient_name: 'Mohammed Khan',
     age: 53,
     gender: 'male',
@@ -254,7 +254,7 @@ export const INITIAL_PATIENTS: AdmittedPatient[] = [
     updated_at: now,
   },
   {
-    patient_id: 8,
+    patient_id: '8',
     patient_name: 'Anjali Reddy',
     age: 29,
     gender: 'female',
@@ -473,7 +473,7 @@ export const INITIAL_BEDS = (() => {
     bed_type: 'ICU' | 'HDU' | 'GENERAL';
     bed_number: number;
     is_available: boolean;
-    current_patient_id: number | null;
+    current_patient_id: string | null;
     last_occupied_at: string | null;
     patient_name: string | null;
     condition: string | null;

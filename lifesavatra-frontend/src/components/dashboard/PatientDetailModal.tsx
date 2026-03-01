@@ -11,25 +11,25 @@ interface PatientDetailModalProps {
 
 const PatientDetailModal: React.FC<PatientDetailModalProps> = ({ patient, onClose, onUpdated }) => {
   const [vitals, setVitals] = useState({
-    heartRate: '',
-    spo2: '',
-    respRate: '',
-    temperature: '',
-    bpSystolic: '',
-    bpDiastolic: '',
+    heartRate: patient.heartRate?.toString() ?? '',
+    spo2: patient.spo2?.toString() ?? '',
+    respRate: patient.respRate?.toString() ?? '',
+    temperature: patient.temperature?.toString() ?? '',
+    bpSystolic: patient.bpSystolic?.toString() ?? '',
+    bpDiastolic: patient.bpDiastolic?.toString() ?? '',
   });
 
   const [patientData, setPatientData] = useState({
-    guardianName: '',
-    guardianPhone: '',
-    guardianRelation: '',
-    emergencyContact: '',
-    address: '',
-    bloodGroup: '',
-    presentingAilment: '',
-    medicalHistory: '',
-    clinicalNotes: '',
-    labResults: '',
+    guardianName: patient.guardianName ?? '',
+    guardianPhone: patient.guardianPhone ?? '',
+    guardianRelation: patient.guardianRelation ?? '',
+    emergencyContact: patient.emergencyContact ?? '',
+    address: patient.address ?? '',
+    bloodGroup: patient.bloodGroup ?? '',
+    presentingAilment: patient.presentingAilment ?? '',
+    medicalHistory: patient.medicalHistory ?? '',
+    clinicalNotes: patient.clinicalNotes ?? '',
+    labResults: patient.labResults ?? '',
   });
 
   const [bedId, setBedId] = useState(patient.bedId);
@@ -64,7 +64,7 @@ const PatientDetailModal: React.FC<PatientDetailModalProps> = ({ patient, onClos
     try {
       setIsUpdating(true);
       // Call API to update vitals
-      const result = await updateVitals(parseInt(patient.id.replace(/\D/g, '')), vitalSigns);
+      const result = await updateVitals(patient.id.replace(/^P-/, ''), vitalSigns);
       if (result.success) {
         setSeverityScore(result.data.severity_score);
         onUpdated();

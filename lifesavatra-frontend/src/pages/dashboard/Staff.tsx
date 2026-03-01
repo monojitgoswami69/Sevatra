@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllStaff, getStaffStats, updateDutyStatus } from '../../services/staffService';
+import { getAllStaff, getStaffStats, updateDutyStatus, deleteStaff } from '../../services/staffService';
 import type { StaffMember, StaffStats } from '../../services/staffService';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useNavbar } from '../../context/NavbarContext';
@@ -19,6 +19,8 @@ const Staff: React.FC = () => {
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ staffId: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -39,6 +41,25 @@ const Staff: React.FC = () => {
       await updateDutyStatus(staffId, currentDutyStatus !== undefined ? !currentDutyStatus : undefined);
       fetchData();
     } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteStaff = (staffId: string, name: string) => {
+    setDeleteConfirm({ staffId, name });
+  };
+
+  const confirmDeleteStaff = async () => {
+    if (!deleteConfirm) return;
+    setIsDeleting(true);
+    try {
+      await deleteStaff(deleteConfirm.staffId);
+      setDeleteConfirm(null);
+      fetchData();
+    } catch (err) {
+      console.error('Delete staff error:', err);
+      alert('Failed to remove staff member.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -86,6 +107,7 @@ const Staff: React.FC = () => {
   const nursePct = totalStaff > 0 ? Math.round((totalNurses / totalStaff) * 100) : 0;
 
   return (
+    <>
     <DashboardLayout>
         <div className="relative z-10 p-8">
 
@@ -269,9 +291,9 @@ const Staff: React.FC = () => {
                             <button
                               onClick={() => handleToggleDuty(staff.staff_id, staff.on_duty)}
                               title="Mark Absent"
-                              className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 hover:border-red-500/60 transition-all"
+                              className="h-8 w-8 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/60 transition-all"
                             >
-                              <span className="material-symbols-outlined text-[18px]">close</span>
+                              <span className="material-symbols-outlined text-[18px]">person_off</span>
                             </button>
                           ) : (
                             <button
@@ -288,6 +310,13 @@ const Staff: React.FC = () => {
                             className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all"
                           >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStaff(staff.staff_id, staff.full_name)}
+                            title="Remove Staff"
+                            className="h-8 w-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 hover:border-red-500/60 transition-all"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
                           </button>
                         </div>
                       </td>
@@ -308,6 +337,51 @@ const Staff: React.FC = () => {
           </div>
         </div>
       </DashboardLayout>
+
+      {/* Delete Staff Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-card rounded-2xl border border-border shadow-2xl p-8 flex flex-col items-center gap-6">
+            <div className="h-16 w-16 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+              <span className="material-symbols-outlined text-red-400 text-3xl">person_remove</span>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-card-foreground mb-2">Remove Staff Member?</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                You are about to permanently remove <span className="font-bold text-card-foreground">{deleteConfirm.name}</span> from the staff directory.<br />
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl border border-border bg-transparent text-muted-foreground hover:text-card-foreground hover:border-card-foreground/30 font-bold text-sm transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteStaff}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="material-symbols-outlined text-base animate-spin">refresh</span>
+                    Removing...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">delete</span>
+                    Remove Staff
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
