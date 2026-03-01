@@ -1,4 +1,4 @@
-const API_BASE = 'https://api-sevatra.vercel.app/api/v1';
+const API_BASE = `${import.meta.env.VITE_API_URL ?? 'https://api-sevatra.vercel.app'}/api/v1`;
 
 // ── Token Management ──
 
