@@ -1,4 +1,6 @@
 import os
+import json
+import base64
 import firebase_admin
 from firebase_admin import credentials, firestore, auth as firebase_auth
 from app.config import get_settings
@@ -15,10 +17,13 @@ def _init_firebase():
         return
 
     settings = get_settings()
-    cred_path = settings.firebase_credentials_path
 
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
+    if settings.firebase_credentials_base64:
+        # Decode base64-encoded service account JSON (ideal for Vercel / serverless)
+        cred_json = json.loads(base64.b64decode(settings.firebase_credentials_base64))
+        cred = credentials.Certificate(cred_json)
+    elif os.path.exists(settings.firebase_credentials_path):
+        cred = credentials.Certificate(settings.firebase_credentials_path)
     else:
         # Fall back to Application Default Credentials (e.g. GCP environment)
         cred = credentials.ApplicationDefault()

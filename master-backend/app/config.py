@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     # ── Firebase ──
     firebase_credentials_path: str = "firebase-credentials.json"
+    firebase_credentials_base64: str = ""
     firebase_api_key: str = ""
 
     # ── Google OAuth ──
