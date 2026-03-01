@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme {
+  --color-primary-amber: #F59E0B;
+  --color-primary-orange: #EA580C;
+  --color-primary-blue: #007BFF;
+  --color-emergency-red: #E63946;
+  --color-success-green: #2ECC71;
+  --color-neutral-gray: #F5F5F5;
+  --color-background-dark: #0A0E27;
+  --color-text-dark: #1C1C1E;
+  --color-text-gray: #6B7280;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-orange: #F59E0B;
+
+  --font-sans: "Inter", "system-ui", sans-serif;
+  --font-display: "Poppins", "Inter", sans-serif;
+  --font-mono: "Space Grotesk", monospace;
+
+  --shadow-glow: 0 0 20px rgba(0, 123, 255, 0.3);
+  --shadow-glow-amber: 0 0 30px rgba(245, 158, 11, 0.4);
+  --shadow-glow-green: 0 0 20px rgba(46, 204, 113, 0.3);
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "liga" 1, "kern" 1;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer utilities {
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .dark .glassmorphism {
+    background: rgba(10, 14, 39, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.05); }
+  }
+
+  .pulse-subtle {
+    animation: pulse-subtle 3s ease-in-out infinite;
+  }
+}
